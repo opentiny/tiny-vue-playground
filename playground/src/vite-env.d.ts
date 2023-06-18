@@ -4,4 +4,4 @@ declare module '*.vue' {
   export default Vue
 }
 
-// declare module 'unocss'
+declare module 'unocss'

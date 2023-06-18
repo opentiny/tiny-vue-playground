@@ -13,6 +13,9 @@
     "vue": "^3.2.47"
   },
   "devDependencies": {
+    "@unocss/preset-attributify": "^0.53.1",
+    "@unocss/preset-icons": "^0.53.1",
+    "@unocss/preset-uno": "^0.53.1",
     "@vitejs/plugin-vue": "^4.1.0",
     "typescript": "^5.0.2",
     "unocss": "^0.53.1",
