@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "pnpm run -C playground dev",
+    "build": "pnpm run -C playground build",
     "lint:fix": "eslint . --fix",
     "lint:eslint": "eslint .",
-    "lint:prettier": "prettier --write .",
+    "lint:prettier": "prettier --config .prettierrc --write .",
     "lint:staged": "lint-staged",
     "prepare": "husky install"
   },
@@ -19,11 +20,18 @@
     "@commitlint/cli": "^17.6.5",
     "@commitlint/config-conventional": "^17.6.5",
     "@ls-lint/ls-lint": "^2.0.0",
+    "@vitejs/plugin-vue": "^4.1.0",
+    "c8": "^8.0.0",
     "eslint": "^8.43.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "happy-dom": "^9.20.3",
     "lint-staged": "^13.2.2",
     "prettier": "^2.8.8",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "vite": "^4.3.9",
+    "vitest": "^0.32.2",
+    "vue": "^3.2.47",
+    "vue-tsc": "^1.4.2"
   }
 }

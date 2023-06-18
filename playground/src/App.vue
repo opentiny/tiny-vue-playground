@@ -1,9 +1,5 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div>
-    <h1>tinyvue-playground</h1>
-  </div>
+  <div text-5xl fw100 animate-bounce-alt animate-count-infinite animate-duration-1s>tinyvue-playground</div>
 </template>
-
-<style scoped></style>

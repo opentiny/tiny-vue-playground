@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 declare module '*.vue' {
-  import type { DefineComponent } from 'vue'
-  const component: DefineComponent<{}, {}, any>
+  import Vue from 'vue'
+  export default Vue
 }
+
+// declare module 'unocss'
