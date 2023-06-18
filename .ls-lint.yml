@@ -1,0 +1,14 @@
+ls:
+  playground/*:
+    .dir: kebab-case
+    .ts: camelCase
+    .tsx: PascalCase
+    .spec.ts: camelCase
+    .d.ts: kebab-case
+    .vue: PascalCase
+    .md: PascalCase
+
+ignore:
+  - .git
+  - .vscode
+  - node_modules
