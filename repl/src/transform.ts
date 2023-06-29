@@ -1,8 +1,11 @@
 import { Store, File } from './store'
+import { getVs } from './utils'
 import {
   SFCDescriptor,
   BindingMetadata,
   CompilerOptions,
+  compileScript,
+  rewriteDefault,
 } from 'vue/compiler-sfc'
 import { transform } from 'sucrase'
 // @ts-ignore
@@ -138,7 +141,8 @@ export async function compileFile(
       id,
       bindings,
       false,
-      isTS
+      isTS,
+      hasScoped
     )
     if (Array.isArray(clientTemplateResult)) {
       return clientTemplateResult
@@ -151,7 +155,8 @@ export async function compileFile(
       id,
       bindings,
       true,
-      isTS
+      isTS,
+      hasScoped
     )
     if (typeof ssrTemplateResult === 'string') {
       // ssr compile failure is fine
@@ -218,45 +223,88 @@ async function doCompileScript(
   ssr: boolean,
   isTS: boolean
 ): Promise<[code: string, bindings: BindingMetadata | undefined]> {
-  if (descriptor.script || descriptor.scriptSetup) {
-    const expressionPlugins: CompilerOptions['expressionPlugins'] = isTS
-      ? ['typescript']
-      : undefined
-    const compiledScript = store.compiler.compileScript(descriptor, {
-      inlineTemplate: true,
-      ...store.options?.script,
-      id,
-      templateOptions: {
-        ...store.options?.template,
-        ssr,
-        ssrCssVars: descriptor.cssVars,
-        compilerOptions: {
-          ...store.options?.template?.compilerOptions,
-          expressionPlugins,
+  if(getVs(store.vueVersion!)) {
+    if (descriptor.script || descriptor.scriptSetup) { //vue3
+      const expressionPlugins: CompilerOptions['expressionPlugins'] = isTS
+        ? ['typescript']
+        : undefined
+      const compiledScript = store.compiler.compileScript(descriptor, {
+        inlineTemplate: true,
+        ...store.options?.script,
+        id,
+        templateOptions: {
+          ...store.options?.template,
+          ssr,
+          ssrCssVars: descriptor.cssVars,
+          compilerOptions: {
+            ...store.options?.template?.compilerOptions,
+            expressionPlugins,
+          },
         },
-      },
-    })
-    let code = ''
-    if (compiledScript.bindings) {
-      code += `\n/* Analyzed bindings: ${JSON.stringify(
-        compiledScript.bindings,
-        null,
-        2
-      )} */`
+      })
+      let code = ''
+      if (compiledScript.bindings) {
+        code += `\n/* Analyzed bindings: ${JSON.stringify(
+          compiledScript.bindings,
+          null,
+          2
+        )} */`
+      }
+      code +=
+        `\n` +
+        store.compiler.rewriteDefault(
+          compiledScript.content,
+          COMP_IDENTIFIER,
+          expressionPlugins
+        )
+  
+      if ((descriptor.script || descriptor.scriptSetup)!.lang === 'ts') {
+        code = await transformTS(code)
+      }
+  
+      return [code, compiledScript.bindings]
     }
-    code +=
-      `\n` +
-      store.compiler.rewriteDefault(
-        compiledScript.content,
-        COMP_IDENTIFIER,
-        expressionPlugins
-      )
+  } else if(!getVs(store.vueVersion!)) { //vue2
+    if (descriptor.script) {
+      const compiledScript = compileScript(descriptor, {
+        inlineTemplate: true,
+        ...store.options?.script,
+        id,
+        templateOptions: {
+          ...store.options?.template,
+          ssrCssVars: descriptor.cssVars,
+          compilerOptions: {
+            ...store.options?.template?.compilerOptions,
+            expressionPlugins: isTS ? ['typescript'] : undefined
+          }
+        }
+      })
 
-    if ((descriptor.script || descriptor.scriptSetup)!.lang === 'ts') {
-      code = await transformTS(code)
+      let code = ''
+      if (compiledScript.bindings) {
+        code += `\n/* Analyzed bindings: ${JSON.stringify(
+          compiledScript.bindings,
+          null,
+          2
+        )} */`
+      }
+      code +=
+        `\n` +
+        rewriteDefault(
+          compiledScript.content,
+          COMP_IDENTIFIER,
+          isTS ? ['typescript'] : undefined
+        )
+
+      if (descriptor.script.lang === 'ts') {
+        code = await transformTS(code)
+      }
+
+      return [code, compiledScript.bindings]
+    } else if (descriptor.scriptSetup) {
+      store.state.errors = ['<script setup> is not supported']
+      return
     }
-
-    return [code, compiledScript.bindings]
   } else {
     return [`\nconst ${COMP_IDENTIFIER} = {}`, undefined]
   }
@@ -268,39 +316,62 @@ async function doCompileTemplate(
   id: string,
   bindingMetadata: BindingMetadata | undefined,
   ssr: boolean,
-  isTS: boolean
+  isTS: boolean,
+  hasScoped: boolean
 ) {
-  let { code, errors } = store.compiler.compileTemplate({
-    isProd: false,
-    ...store.options?.template,
-    source: descriptor.template!.content,
-    filename: descriptor.filename,
-    id,
-    scoped: descriptor.styles.some((s) => s.scoped),
-    slotted: descriptor.slotted,
-    ssr,
-    ssrCssVars: descriptor.cssVars,
-    compilerOptions: {
-      ...store.options?.template?.compilerOptions,
-      bindingMetadata,
-      expressionPlugins: isTS ? ['typescript'] : undefined,
-    },
-  })
-  if (errors.length) {
-    return errors
+  if(getVs(store.vueVersion!)) { //vue3
+    let { code, errors } = store.compiler.compileTemplate({
+      isProd: false,
+      ...store.options?.template,
+      source: descriptor.template!.content,
+      filename: descriptor.filename,
+      id,
+      scoped: descriptor.styles.some((s) => s.scoped),
+      slotted: descriptor.slotted,
+      ssr,
+      ssrCssVars: descriptor.cssVars,
+      compilerOptions: {
+        ...store.options?.template?.compilerOptions,
+        bindingMetadata,
+        expressionPlugins: isTS ? ['typescript'] : undefined,
+      },
+    })
+    if (errors.length) {
+      return errors
+    }
+
+    const fnName = ssr ? `ssrRender` : `render`
+
+    code =
+      `\n${code.replace(
+        /\nexport (function|const) (render|ssrRender)/,
+        `$1 ${fnName}`
+      )}` + `\n${COMP_IDENTIFIER}.${fnName} = ${fnName}`
+
+    if ((descriptor.script || descriptor.scriptSetup)?.lang === 'ts') {
+      code = await transformTS(code)
+    }
+
+    return code
+  } else {
+    let code = descriptor.template?.content
+
+    if (hasScoped) {
+      const node = document.createElement('div')
+      node.innerHTML = descriptor.template?.content || ''
+      if (node.childElementCount !== 1) {
+        store.state.errors = ['only one element on template toot allowed']
+      }
+      node.querySelectorAll('*').forEach(it => it.setAttribute(`data-v-${id}`, ''))
+      code = new XMLSerializer().serializeToString(node.firstElementChild!)
+    }
+  
+    code = `\n${COMP_IDENTIFIER}.template = \`${code}\``
+  
+    if (isTS) {
+      code = await transformTS(code)
+    }
+  
+    return code
   }
-
-  const fnName = ssr ? `ssrRender` : `render`
-
-  code =
-    `\n${code.replace(
-      /\nexport (function|const) (render|ssrRender)/,
-      `$1 ${fnName}`
-    )}` + `\n${COMP_IDENTIFIER}.${fnName} = ${fnName}`
-
-  if ((descriptor.script || descriptor.scriptSetup)?.lang === 'ts') {
-    code = await transformTS(code)
-  }
-
-  return code
 }

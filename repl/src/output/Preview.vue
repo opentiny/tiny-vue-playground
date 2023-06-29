@@ -15,8 +15,10 @@ import { PreviewProxy } from './PreviewProxy'
 import { compileModulesForPreview } from './moduleCompiler'
 import { Store } from '../store'
 import { Props } from '../Repl.vue'
+import { getVs } from '../utils'
 
 const props = defineProps<{ show: boolean; ssr: boolean }>()
+console.log(props)
 
 const store = inject('store') as Store
 const clearConsole = inject('clear-console') as Ref<boolean>
@@ -161,8 +163,9 @@ async function updatePreview() {
   runtimeError.value = null
   runtimeWarning.value = null
 
-  let isSSR = props.ssr
-  if (store.vueVersion) {
+  // let isSSR = props.ssr
+  let isSSR = false
+  if (store.vueVersion && isSSR) {
     const [major, minor, patch] = store.vueVersion
       .split('.')
       .map((v) => parseInt(v, 10))
@@ -215,7 +218,15 @@ async function updatePreview() {
       }.`
     )
 
-    const codeToEval = [
+    const t2 = [
+      `window.__modules__ = {};window.__css__ = '';` +
+      `if (window.__app__) window.__app__.$destroy();` +
+      `document.body.innerHTML = '<div id="app"></div>'`,
+      ...modules,
+      `document.getElementById('__sfc-styles').innerHTML = window.__css__`
+    ]
+
+    const t3 = [
       `window.__modules__ = {};window.__css__ = [];` +
         `if (window.__app__) window.__app__.unmount();` +
         (isSSR
@@ -230,9 +241,12 @@ async function updatePreview() {
       }, 1)`,
     ]
 
+    const codeToEval = getVs(store.vueVersion!) === true ? t3 : t2
+
     // if main file is a vue file, mount it.
     if (mainFile.endsWith('.vue')) {
-      codeToEval.push(
+      getVs(store.vueVersion!) === true ?
+        codeToEval.push(
         `import { ${
           isSSR ? `createSSRApp` : `createApp`
         } as _createApp } from "vue"
@@ -247,6 +261,25 @@ async function updatePreview() {
           app.config.errorHandler = e => console.error(e)
           ${previewOptions?.customCode?.useCode || ''}
           app.mount('#app')
+        }
+        if (window.__ssr_promise__) {
+          window.__ssr_promise__.then(_mount)
+        } else {
+          _mount()
+        }`
+      )
+      :
+      codeToEval.push(
+        `import Vue from "vue"
+        const _mount = () => {
+          const AppComponent = __modules__["${mainFile}"].default
+          AppComponent.name = 'Repl'
+          AppComponent.el = "#app"
+          const app = window.__app__ = new Vue(AppComponent)
+          Vue.config.errorHandler = console.error
+          // app.config.unwrapInjectedRef = true
+          // app.config.errorHandler = e => console.error(e)
+          // app.mount('#app')
         }
         if (window.__ssr_promise__) {
           window.__ssr_promise__.then(_mount)

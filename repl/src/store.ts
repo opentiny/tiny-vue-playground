@@ -1,7 +1,7 @@
 import { version, reactive, watchEffect, watch } from 'vue'
 import * as defaultCompiler from 'vue/compiler-sfc'
 import { compileFile } from './transform'
-import { utoa, atou } from './utils'
+import { utoa, atou, getVs } from './utils'
 import {
   SFCScriptCompileOptions,
   SFCAsyncStyleCompileOptions,
@@ -18,7 +18,7 @@ export const tsconfigFile = 'tsconfig.json'
 
 const welcomeCode = `
 <script setup>
-import { ref } from 'vue'
+import { ref, version } from 'vue'
 
 const msg = ref('Hello World!')
 </script>
@@ -26,6 +26,7 @@ const msg = ref('Hello World!')
 <template>
   <h1>{{ msg }}</h1>
   <input v-model="msg">
+  <h1>{{ version }}</h1>
 </template>
 `.trim()
 
@@ -134,13 +135,15 @@ export class ReplStore implements Store {
 
   constructor({
     serializedState = '',
-    defaultVueRuntimeURL = `https://cdn.jsdelivr.net/npm/@vue/runtime-dom@${version}/dist/runtime-dom.esm-browser.js`,
+    // defaultVueRuntimeURL = `https://cdn.jsdelivr.net/npm/@vue/runtime-dom@${version}/dist/runtime-dom.esm-browser.js`,
+    defaultVueRuntimeURL = `https://unpkg.com/vue@${version}/dist/vue.esm-browser.js`,
     defaultVueServerRendererURL = `https://cdn.jsdelivr.net/npm/@vue/server-renderer@${version}/dist/server-renderer.esm-browser.js`,
     showOutput = false,
-    outputMode = 'preview',
+    outputMode = 'preview'
   }: StoreOptions = {}) {
     const files: StoreState['files'] = {}
-
+    this.vueVersion = version
+    
     if (serializedState) {
       const saved = JSON.parse(atou(serializedState))
       for (const filename in saved) {
@@ -339,7 +342,7 @@ export class ReplStore implements Store {
           {
             imports: {
               vue: this.defaultVueRuntimeURL,
-              'vue/server-renderer': this.defaultVueServerRendererURL,
+              // 'vue/server-renderer': this.defaultVueServerRendererURL,
             },
           },
           null,
@@ -354,13 +357,13 @@ export class ReplStore implements Store {
         } else {
           json.imports.vue = fixURL(json.imports.vue)
         }
-        if (!json.imports['vue/server-renderer']) {
-          json.imports['vue/server-renderer'] = this.defaultVueServerRendererURL
-        } else {
-          json.imports['vue/server-renderer'] = fixURL(
-            json.imports['vue/server-renderer']
-          )
-        }
+        // if (!json.imports['vue/server-renderer']) {
+        //   json.imports['vue/server-renderer'] = this.defaultVueServerRendererURL
+        // } else {
+        //   json.imports['vue/server-renderer'] = fixURL(
+        //     json.imports['vue/server-renderer']
+        //   )
+        // }
         map.code = JSON.stringify(json, null, 2)
       } catch (e) {}
     }
@@ -386,8 +389,9 @@ export class ReplStore implements Store {
 
   async setVueVersion(version: string) {
     this.vueVersion = version
-    const compilerUrl = `https://cdn.jsdelivr.net/npm/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`
-    const runtimeUrl = `https://cdn.jsdelivr.net/npm/@vue/runtime-dom@${version}/dist/runtime-dom.esm-browser.js`
+    // const compilerUrl = `https://cdn.jsdelivr.net/npm/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`
+    const compilerUrl = `https://unpkg.com/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`
+    const runtimeUrl = getVs(version) === false ? `https://unpkg.com/vue@${version}/dist/vue.esm.browser.js` : `https://unpkg.com/vue@${version}/dist/vue.esm-browser.js`
     const ssrUrl = `https://cdn.jsdelivr.net/npm/@vue/server-renderer@${version}/dist/server-renderer.esm-browser.js`
     this.pendingCompiler = import(/* @vite-ignore */ compilerUrl)
     this.compiler = await this.pendingCompiler

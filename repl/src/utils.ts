@@ -31,3 +31,8 @@ export function atou(base64: string): string {
   // https://base64.guru/developers/javascript/examples/unicode-strings
   return decodeURIComponent(escape(binary))
 }
+
+
+export function getVs(version:string){
+  return Number(version.split('.')[0]) === 3 ? true : false
+}
