@@ -142,7 +142,7 @@ export class ReplStore implements Store {
     outputMode = 'preview'
   }: StoreOptions = {}) {
     const files: StoreState['files'] = {}
-    this.vueVersion = '2.7.47'
+    this.vueVersion = version
     
     if (serializedState) {
       const saved = JSON.parse(atou(serializedState))

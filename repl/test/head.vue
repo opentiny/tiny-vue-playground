@@ -145,7 +145,7 @@ nav {
     background-color: var(--bg);
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.33);
     position: relative;
-    z-index: 999;
+    z-index: 10;
     display: flex;
     justify-content: space-between;
 }
