@@ -174,6 +174,7 @@ export class ReplStore implements Store {
 
     this.initImportMap()
     this.initTsConfig()
+    // this.initVueVersion(version)
   }
 
   // don't start compiling until the options are set
@@ -221,6 +222,7 @@ export class ReplStore implements Store {
   }
 
   setActive(filename: string) {
+    console.log('set file', filename)
     this.state.activeFile = this.state.files[filename]
   }
 
@@ -407,9 +409,16 @@ export class ReplStore implements Store {
     console.info(`[@vue/repl] Now using Vue version: ${version}`)
   }
 
+  // async initVueVersion(version: string){
+  //   const compilerUrl = `https://unpkg.com/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`
+  //   const pendingCompiler = import(/* @vite-ignore */ compilerUrl)
+  //   const c = await pendingCompiler
+  //   this.compiler = c
+  // }
+
   resetVueVersion() {
     this.vueVersion = undefined
-    this.compiler = defaultCompiler
+    this.compiler =  defaultCompiler
     this.state.vueRuntimeURL = this.defaultVueRuntimeURL
     this.state.vueServerRendererURL = this.defaultVueServerRendererURL
     const importMap = this.getImportMap()

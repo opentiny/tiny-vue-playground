@@ -45,7 +45,7 @@ const App = {
         theme: 'dark',
         editor: MonacoEditor as any as EditorComponentType,
         // layout: 'vertical',
-        ssr: true,
+        ssr: false,
         sfcOptions: {
           script: {
             // inlineTemplate: false

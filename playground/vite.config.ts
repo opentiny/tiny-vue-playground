@@ -6,7 +6,11 @@ import { presetAttributify, presetIcons, presetUno } from 'unocss'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    vue(),
+    vue({
+      script: {
+        defineModel: true
+      }
+    }),
     UnoCSS({
       presets: [presetUno(), presetAttributify(), presetIcons()]
     })

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-// import { Repl } from '../../repl/src/index'
+import { ref } from 'vue'
+import { Repl } from 'opentiny-repl'
+import MonacoEditor from 'opentiny-repl/monaco-editor'
+import 'opentiny-repl/style.css'
+
+const name = ref('xioa')
 </script>
 
 <template>
-  <div text-5l fw100 animate-bounce-alt animate-count-infinite animate-duration-1s>
-    tinyvue-playground
-  </div>
-  <!-- <Repl :editor="" /> -->
+  <Repl :editor="MonacoEditor" />
 </template>

@@ -1,9 +1,13 @@
 import { Store, File } from './store'
-import { getVs } from './utils'
+import { getVs } from './utils';
 import {
   SFCDescriptor,
   BindingMetadata,
+  shouldTransformRef,
+  transformRef,
+  parse,
   CompilerOptions,
+  compileStyleAsync,
   compileScript,
   rewriteDefault,
 } from 'vue/compiler-sfc'
@@ -33,6 +37,9 @@ export async function compileFile(
   }
 
   if (filename.endsWith('.js') || filename.endsWith('.ts')) {
+    if (shouldTransformRef(code)) {
+      code = transformRef(code, { filename }).code
+    }
     if (filename.endsWith('.ts')) {
       code = await transformTS(code)
     }
@@ -57,10 +64,10 @@ export async function compileFile(
   }
 
   const id = hashId(filename)
-  const { errors, descriptor } = store.compiler.parse(code, {
+  const { errors, descriptor } = store.compiler ? store.compiler.parse(code, {
     filename,
     sourceMap: true,
-  })
+  }) : parse(code, {filename, sourceMap: true})
   if (errors.length) {
     return errors
   }
@@ -188,7 +195,8 @@ export async function compileFile(
       return [`<style module> is not supported in the playground.`]
     }
 
-    const styleResult = await store.compiler.compileStyleAsync({
+    // const styleResult = await store.compiler.compileStyleAsync({
+    const styleResult = await compileStyleAsync({
       ...store.options?.style,
       source: style.content,
       filename,
@@ -222,6 +230,7 @@ async function doCompileScript(
   id: string,
   ssr: boolean,
   isTS: boolean
+  //@ts-ignore
 ): Promise<[code: string, bindings: BindingMetadata | undefined]> {
   if(getVs(store.vueVersion!)) {
     if (descriptor.script || descriptor.scriptSetup) { //vue3
@@ -243,7 +252,7 @@ async function doCompileScript(
         },
       })
       let code = ''
-      if (compiledScript.bindings) {
+      if (compiledScript?.bindings) {
         code += `\n/* Analyzed bindings: ${JSON.stringify(
           compiledScript.bindings,
           null,
@@ -252,7 +261,7 @@ async function doCompileScript(
       }
       code +=
         `\n` +
-        store.compiler.rewriteDefault(
+        store.compiler?.rewriteDefault(
           compiledScript.content,
           COMP_IDENTIFIER,
           expressionPlugins
@@ -264,7 +273,7 @@ async function doCompileScript(
   
       return [code, compiledScript.bindings]
     }
-  } else if(!getVs(store.vueVersion!)) { //vue2
+  } else if(getVs(store.vueVersion!) === false) { //vue2
     if (descriptor.script) {
       const compiledScript = compileScript(descriptor, {
         inlineTemplate: true,
@@ -303,7 +312,7 @@ async function doCompileScript(
       return [code, compiledScript.bindings]
     } else if (descriptor.scriptSetup) {
       store.state.errors = ['<script setup> is not supported']
-      return
+      return [`\nconst ${COMP_IDENTIFIER} = {}`, undefined]
     }
   } else {
     return [`\nconst ${COMP_IDENTIFIER} = {}`, undefined]
@@ -319,6 +328,7 @@ async function doCompileTemplate(
   isTS: boolean,
   hasScoped: boolean
 ) {
+  console.log('version是3', store.vueVersion, getVs(store.vueVersion!))
   if(getVs(store.vueVersion!)) { //vue3
     let { code, errors } = store.compiler.compileTemplate({
       isProd: false,
@@ -367,6 +377,7 @@ async function doCompileTemplate(
     }
   
     code = `\n${COMP_IDENTIFIER}.template = \`${code}\``
+    console.log('code', code)
   
     if (isTS) {
       code = await transformTS(code)

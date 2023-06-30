@@ -9,8 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "opentiny-repl": "workspace:^0.1.0",
-    "vue": "^3.2.47"
+    "opentiny-repl": "workspace:^0.1.0"
   },
   "devDependencies": {
     "@unocss/preset-attributify": "^0.53.1",

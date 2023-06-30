@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import DefineOptions from 'unplugin-vue-define-options/vite'
 import replace from '@rollup/plugin-replace'
 
 export default defineConfig({
@@ -9,6 +10,7 @@ export default defineConfig({
         defineModel: true,
       },
     }),
+    DefineOptions()
   ],
   resolve: {
     alias: {

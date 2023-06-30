@@ -5,3 +5,7 @@ declare module '*.vue' {
 }
 
 declare module 'unocss'
+
+declare module 'opentiny-repl'
+
+declare module 'opentiny-repl/monaco-editor'

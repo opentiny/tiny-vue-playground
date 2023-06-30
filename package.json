@@ -8,6 +8,7 @@
     "dev": "pnpm run -C playground dev",
     "build": "pnpm run -C playground build",
     "dev:repl": "pnpm run -C repl dev",
+    "build:repl": "pnpm run -C repl build && pnpm run -C repl build-types",
     "lint:fix": "eslint . --fix",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier --config .prettierrc --write .",
