@@ -17,10 +17,13 @@ import { Store } from '../store'
 import { Props } from '../Repl.vue'
 import { getVs } from '../utils'
 
-const props = defineProps<{ show: boolean; ssr: boolean }>()
-console.log(props)
+defineProps<{ show: boolean; ssr: boolean }>()
 
 const store = inject('store') as Store
+
+let version = ref<typeof store.vueVersion>()
+watchEffect(() => version.value = store.vueVersion)
+
 const clearConsole = inject('clear-console') as Ref<boolean>
 
 const previewOptions = inject('preview-options') as Props['previewOptions']
@@ -49,8 +52,29 @@ watch(
   }
 )
 
+// reset sandbox when import map changes
+watch(
+  () => store.state.files['import-map.json'].code,
+  (raw) => {
+    try {
+      const map = JSON.parse(raw)
+      if (!map.imports) {
+        store.state.errors = [`import-map.json is missing "imports" field.`]
+        return
+      }
+      createSandbox()
+    } catch (e: any) {
+      store.state.errors = [e as Error]
+      return
+    }
+  }
+)
+
 // reset sandbox when version changes
 watch(() => store.state.resetFlip, createSandbox)
+
+// reset sandbox when version changes
+watch(() => store.state.vueRuntimeURL, createSandbox)
 
 onUnmounted(() => {
   proxy.destroy()
@@ -241,11 +265,11 @@ async function updatePreview() {
       }, 1)`,
     ]
 
-    const codeToEval = getVs(store.vueVersion!) === true ? t3 : t2
+    const codeToEval = getVs(version.value!) === true ? t3 : t2
 
     // if main file is a vue file, mount it.
     if (mainFile.endsWith('.vue')) {
-      getVs(store.vueVersion!) === true ?
+      getVs(version.value!) === true ?
         codeToEval.push(
         `import { ${
           isSSR ? `createSSRApp` : `createApp`

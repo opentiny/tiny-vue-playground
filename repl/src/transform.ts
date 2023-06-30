@@ -329,40 +329,7 @@ async function doCompileTemplate(
   hasScoped: boolean
 ) {
   console.log('version是3', store.vueVersion, getVs(store.vueVersion!))
-  if(getVs(store.vueVersion!)) { //vue3
-    let { code, errors } = store.compiler.compileTemplate({
-      isProd: false,
-      ...store.options?.template,
-      source: descriptor.template!.content,
-      filename: descriptor.filename,
-      id,
-      scoped: descriptor.styles.some((s) => s.scoped),
-      slotted: descriptor.slotted,
-      ssr,
-      ssrCssVars: descriptor.cssVars,
-      compilerOptions: {
-        ...store.options?.template?.compilerOptions,
-        bindingMetadata,
-        expressionPlugins: isTS ? ['typescript'] : undefined,
-      },
-    })
-    if (errors.length) {
-      return errors
-    }
-
-    const fnName = ssr ? `ssrRender` : `render`
-
-    code =
-      `\n${code.replace(
-        /\nexport (function|const) (render|ssrRender)/,
-        `$1 ${fnName}`
-      )}` + `\n${COMP_IDENTIFIER}.${fnName} = ${fnName}`
-
-    if ((descriptor.script || descriptor.scriptSetup)?.lang === 'ts') {
-      code = await transformTS(code)
-    }
-
-    return code
+  if(false) { //vue3
   } else {
     let code = descriptor.template?.content
 
@@ -377,7 +344,6 @@ async function doCompileTemplate(
     }
   
     code = `\n${COMP_IDENTIFIER}.template = \`${code}\``
-    console.log('code', code)
   
     if (isTS) {
       code = await transformTS(code)
