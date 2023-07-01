@@ -21,9 +21,6 @@ defineProps<{ show: boolean; ssr: boolean }>()
 
 const store = inject('store') as Store
 
-let version = ref<typeof store.vueVersion>()
-watchEffect(() => version.value = store.vueVersion)
-
 const clearConsole = inject('clear-console') as Ref<boolean>
 
 const previewOptions = inject('preview-options') as Props['previewOptions']
@@ -207,31 +204,32 @@ async function updatePreview() {
 
     // if SSR, generate the SSR bundle and eval it to render the HTML
     if (isSSR && mainFile.endsWith('.vue')) {
-      const ssrModules = compileModulesForPreview(store, true)
-      console.log(
-        `[@vue/repl] successfully compiled ${ssrModules.length} modules for SSR.`
-      )
-      await proxy.eval([
-        `const __modules__ = {};`,
-        ...ssrModules,
-        `import { renderToString as _renderToString } from 'vue/server-renderer'
-         import { createSSRApp as _createApp } from 'vue'
-         const AppComponent = __modules__["${mainFile}"].default
-         AppComponent.name = 'Repl'
-         const app = _createApp(AppComponent)
-         if (!app.config.hasOwnProperty('unwrapInjectedRef')) {
-           app.config.unwrapInjectedRef = true
-         }
-         app.config.warnHandler = () => {}
-         window.__ssr_promise__ = _renderToString(app).then(html => {
-           document.body.innerHTML = '<div id="app">' + html + '</div>' + \`${
-             previewOptions?.bodyHTML || ''
-           }\`
-         }).catch(err => {
-           console.error("SSR Error", err)
-         })
-        `,
-      ])
+      return;
+      // const ssrModules = compileModulesForPreview(store, true)
+      // console.log(
+      //   `[@vue/repl] successfully compiled ${ssrModules.length} modules for SSR.`
+      // )
+      // await proxy.eval([
+      //   `const __modules__ = {};`,
+      //   ...ssrModules,
+      //   `import { renderToString as _renderToString } from 'vue/server-renderer'
+      //    import { createSSRApp as _createApp } from 'vue'
+      //    const AppComponent = __modules__["${mainFile}"].default
+      //    AppComponent.name = 'Repl'
+      //    const app = _createApp(AppComponent)
+      //    if (!app.config.hasOwnProperty('unwrapInjectedRef')) {
+      //      app.config.unwrapInjectedRef = true
+      //    }
+      //    app.config.warnHandler = () => {}
+      //    window.__ssr_promise__ = _renderToString(app).then(html => {
+      //      document.body.innerHTML = '<div id="app">' + html + '</div>' + \`${
+      //        previewOptions?.bodyHTML || ''
+      //      }\`
+      //    }).catch(err => {
+      //      console.error("SSR Error", err)
+      //    })
+      //   `,
+      // ])
     }
 
     // compile code to simulated module system
@@ -265,11 +263,12 @@ async function updatePreview() {
       }, 1)`,
     ]
 
-    const codeToEval = getVs(version.value!) === true ? t3 : t2
+    const codeToEval = getVs(store.vueVersion!) === true ? t3 : t2
 
     // if main file is a vue file, mount it.
     if (mainFile.endsWith('.vue')) {
-      getVs(version.value!) === true ?
+      console.log('实时更改版本', store.vueVersion)
+      getVs(store.vueVersion!) === true ?
         codeToEval.push(
         `import { ${
           isSSR ? `createSSRApp` : `createApp`

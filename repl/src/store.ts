@@ -142,7 +142,6 @@ export class ReplStore implements Store {
     outputMode = 'preview'
   }: StoreOptions = {}) {
     const files: StoreState['files'] = {}
-    this.vueVersion = version
     
     if (serializedState) {
       const saved = JSON.parse(atou(serializedState))
@@ -174,6 +173,15 @@ export class ReplStore implements Store {
 
     this.initImportMap()
     this.initTsConfig()
+
+    if(this.state.files[importMapFile].code) {
+      const url = this.state.files[importMapFile].code
+      const versionRegex = /@([\d.]+)\//;
+      const vs = url.match(versionRegex)![1];
+      this.vueVersion = vs
+    } else {
+      this.vueVersion = version
+    }
   }
 
   // don't start compiling until the options are set
@@ -222,6 +230,12 @@ export class ReplStore implements Store {
 
   setActive(filename: string) {
     this.state.activeFile = this.state.files[filename]
+    if(filename === importMapFile){
+      const url = this.state.activeFile.code
+      const versionRegex = /@([\d.]+)\//;
+      const vs = url.match(versionRegex)![1];
+      this.vueVersion = vs
+    }
   }
 
   addFile(fileOrFilename: string | File): void {
@@ -389,10 +403,11 @@ export class ReplStore implements Store {
 
   async setVueVersion(version: string) {
     this.vueVersion = version
-    const compilerUrl = getVs(version) === false ? `https://unpkg.com/vue@${version}/dist/vue.esm.browser.js` : `https://cdn.jsdelivr.net/npm/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`
+    const compilerUrl = getVs(version) === false ? `` : `https://cdn.jsdelivr.net/npm/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`
     // const compilerUrl = `https://unpkg.com/@vue/compiler-sfc@${this.vueVersion}/dist/compiler-sfc.esm-browser.js`
     const runtimeUrl = getVs(version) === false ? `https://unpkg.com/vue@${version}/dist/vue.esm.browser.js` : `https://unpkg.com/vue@${version}/dist/vue.esm-browser.js`
-    const ssrUrl = `https://cdn.jsdelivr.net/npm/@vue/server-renderer@${version}/dist/server-renderer.esm-browser.js`
+    // const ssrUrl = `https://cdn.jsdelivr.net/npm/@vue/server-renderer@${version}/dist/server-renderer.esm-browser.js`
+    const ssrUrl = ''
     this.pendingCompiler = import(/* @vite-ignore */ compilerUrl)
     this.compiler = await this.pendingCompiler
     this.pendingCompiler = null
@@ -403,7 +418,6 @@ export class ReplStore implements Store {
     imports.vue = runtimeUrl
     imports['vue/server-renderer'] = ssrUrl
     this.setImportMap(importMap)
-    console.log('更新', this.state.files)
     this.forceSandboxReset()
     console.info(`[@vue/repl] Now using Vue version: ${version}`)
   }
