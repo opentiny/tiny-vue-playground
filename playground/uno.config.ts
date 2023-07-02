@@ -1,5 +1,9 @@
 import { defineConfig } from 'unocss'
+import transformerDirective from '@unocss/transformer-directives'
 
 export default defineConfig({
-  // ...UnoCSS选项
+  transformers: [transformerDirective()],
+  shortcuts: {
+    'color-primary': 'color-[var(--el-color-primary)]'
+  }
 })

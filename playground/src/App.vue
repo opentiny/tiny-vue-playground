@@ -1,42 +1,110 @@
 <script setup lang="ts">
-import { Repl } from 'opentiny-repl'
-import MonacoEditor from 'opentiny-repl/monaco-editor'
-import 'opentiny-repl/style.css'
+import { Repl, type SFCOptions } from 'opentiny-repl'
+import Monaco from 'opentiny-repl/monaco-editor'
+import { ref, watchEffect } from 'vue'
+import { useDark } from '@vueuse/core'
+import { IMPORT_MAP, useStore } from './composables/store'
+import { type ImportMap } from '@/utils/import-map'
+import { type UserOptions } from '@/composables/store'
+
+const loading = ref(true)
+
+type SFCOptionsInstance = typeof SFCOptions
+// enable experimental features
+const sfcOptions: SFCOptionsInstance = {
+  script: {
+    reactivityTransform: true,
+    defineModel: true,
+  },
+}
+
+const initialUserOptions: UserOptions = {}
+
+const pr = new URLSearchParams(location.search).get('pr')
+if (pr) {
+  initialUserOptions.showHidden = true
+  initialUserOptions.styleSource = `https://preview-${pr}-element-plus.surge.sh/bundle/index.css`
+}
+
+const store = useStore({
+  serializedState: location.hash.slice(1),
+  userOptions: initialUserOptions,
+  pr,
+})
+
+if (pr) {
+  const map: ImportMap = {
+    imports: {
+      'element-plus': `https://preview-${pr}-element-plus.surge.sh/bundle/index.full.min.mjs`,
+      'element-plus/': 'unsupported',
+    },
+  }
+  store.state.files[IMPORT_MAP].code = JSON.stringify(map, undefined, 2)
+  const url = `${location.origin}${location.pathname}#${store.serialize()}`
+  history.replaceState({}, '', url)
+}
+
+if (store.pr) {
+  if (!store.userOptions.value.styleSource)
+    store.userOptions.value.styleSource = `https://preview-${store.pr}-element-plus.surge.sh/bundle/index.css`
+  store.versions.elementPlus = 'preview'
+}
+store.init().then(() => (loading.value = false))
+if (!store.pr && store.userOptions.value.styleSource)
+  store.pr = store.userOptions.value.styleSource.split('-', 2)[1]
+
+// eslint-disable-next-line no-console
+console.log('Store:', store)
+
+function handleKeydown(evt: KeyboardEvent) {
+  if ((evt.ctrlKey || evt.metaKey) && evt.code === 'KeyS')
+    evt.preventDefault()
+}
+
+const dark = useDark()
+
+// persist state
+watchEffect(() => history.replaceState({}, '', `#${store.serialize()}`))
 </script>
 
 <template>
-  <div class="container">
-    <Repl :editor="MonacoEditor" />
+  <div v-if="!loading" antialiased>
+    <Header :store="store" />
+    <Repl
+      :theme="dark ? 'dark' : 'light'"
+      :store="store"
+      :editor="Monaco"
+      show-compile-output
+      auto-resize
+      :sfc-options="sfcOptions"
+      :clear-console="false"
+      @keydown="handleKeydown"
+    />
   </div>
+  <template v-else>
+    <div v-loading="{ text: 'Loading...' }" h-100vh />
+  </template>
 </template>
 
-<style scoped>
-.dark {
-  color-scheme: dark;
-}
-
-html,
+<style>
 body {
-  height: 100%;
-  margin: 0;
-  font-size: 13px;
+  --at-apply: m-none text-13px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
     'Helvetica Neue', sans-serif;
-  margin: 0;
   --base: #444;
   --nav-height: 50px;
 }
 
-.container {
-  /* height: calc(100vh - 50px); */
-  height: 97vh;
+.vue-repl {
+  height: calc(100vh - var(--nav-height)) !important;
 }
 
-button {
-  border: none;
-  outline: none;
-  cursor: pointer;
-  margin: 0;
-  background-color: transparent;
+.dark .vue-repl,
+.vue-repl {
+  --color-branding: var(--el-color-primary) !important;
+}
+
+.dark body {
+  background-color: #1a1a1a;
 }
 </style>
