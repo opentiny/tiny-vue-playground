@@ -364,6 +364,8 @@ async function doCompileTemplate(
 
     return code
   } else {
+    // console.log('vue2的compiler', store.compiler)
+
     let code = descriptor.template?.content
 
     if (hasScoped) {

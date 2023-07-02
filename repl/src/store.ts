@@ -177,10 +177,16 @@ export class ReplStore implements Store {
     if(this.state.files[importMapFile].code) {
       const url = this.state.files[importMapFile].code
       const versionRegex = /@([\d.]+)\//;
-      const vs = url.match(versionRegex)![1];
-      this.vueVersion = vs
-    } else {
+      if(url.match(versionRegex)){
+        const vs = url.match(versionRegex)![1];
+        this.vueVersion = vs
+      } else {
+        this.vueVersion = '3.2.47'
+      }
+    } else if(version){
       this.vueVersion = version
+    } else {
+      this.vueVersion = '3.2.47'
     }
   }
 
@@ -233,8 +239,10 @@ export class ReplStore implements Store {
     if(filename === importMapFile){
       const url = this.state.activeFile.code
       const versionRegex = /@([\d.]+)\//;
-      const vs = url.match(versionRegex)![1];
-      this.vueVersion = vs
+      if(url.match(versionRegex)){
+        const vs = url.match(versionRegex)![1];
+        this.vueVersion = vs
+      }
     }
   }
 
@@ -403,7 +411,7 @@ export class ReplStore implements Store {
 
   async setVueVersion(version: string) {
     this.vueVersion = version
-    const compilerUrl = getVs(version) === false ? `` : `https://cdn.jsdelivr.net/npm/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`
+    const compilerUrl = getVs(version) === false ? `https://cdn.jsdelivr.net/npm/vue@${version}/dist/vue.esm.browser.js` : `https://cdn.jsdelivr.net/npm/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`
     // const compilerUrl = `https://unpkg.com/@vue/compiler-sfc@${this.vueVersion}/dist/compiler-sfc.esm-browser.js`
     const runtimeUrl = getVs(version) === false ? `https://unpkg.com/vue@${version}/dist/vue.esm.browser.js` : `https://unpkg.com/vue@${version}/dist/vue.esm-browser.js`
     // const ssrUrl = `https://cdn.jsdelivr.net/npm/@vue/server-renderer@${version}/dist/server-renderer.esm-browser.js`
