@@ -167,9 +167,8 @@ export function useStore(initial: Initial) {
       files[APP_FILE] = new File(APP_FILE, welcomeCode)
     }
     files[MAIN_FILE] = new File(MAIN_FILE, mainCode, hideFile.value)
-    if (!files[IMPORT_MAP]) {
-      files[IMPORT_MAP] = new File(IMPORT_MAP, JSON.stringify({ imports: {} }, undefined, 2))
-    }
+    if (!files[IMPORT_MAP]) files[IMPORT_MAP] = new File(IMPORT_MAP, JSON.stringify({ imports: {} }, undefined, 2))
+
     if (!files[TSCONFIG]) files[TSCONFIG] = new File(TSCONFIG, tsconfigCode)
 
     return files

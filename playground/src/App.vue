@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { gte } from 'semver'
 import { Repl, type SFCOptions } from 'opentiny-repl'
 import Monaco from 'opentiny-repl/monaco-editor'
-import { ref, watchEffect } from 'vue'
-import { useDark } from '@vueuse/core'
+import type { Ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
+import { useDark, useFetch } from '@vueuse/core'
 import { IMPORT_MAP, useStore } from './composables/store'
 import { type ImportMap } from '@/utils/import-map'
 import { type UserOptions } from '@/composables/store'
@@ -65,6 +67,25 @@ const dark = useDark()
 
 // persist state
 watchEffect(() => history.replaceState({}, '', `#${store.serialize()}`))
+
+// ---------test-----------------------
+function fetchVersions() {
+  return useFetch(
+    // https://registry.npmjs.org/@opentiny/vue
+    'https://data.jsdelivr.com/v1/package/npm/@opentiny/vue',
+    {
+      initialData: {},
+
+      // eslint-disable-next-line no-sequences
+      afterFetch: ctx => ((ctx.data = ctx.data.versions), ctx),
+    },
+  ).json<string[]>().data as Ref<string[]>
+}
+const versions = fetchVersions()
+
+const v = computed(() => versions.value.filter(version => gte(version, '3.2.0')))
+// eslint-disable-next-line no-console
+console.log('v', v)
 </script>
 
 <template>
