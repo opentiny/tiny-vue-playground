@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { gte } from 'semver'
 import { Repl, type SFCOptions } from 'opentiny-repl'
 import Monaco from 'opentiny-repl/monaco-editor'
-import type { Ref } from 'vue'
-import { computed, ref, watchEffect } from 'vue'
-import { useDark, useFetch } from '@vueuse/core'
-import { IMPORT_MAP, useStore } from './composables/store'
-import { type ImportMap } from '@/utils/import-map'
+import { ref, watchEffect } from 'vue'
+import { useDark } from '@vueuse/core'
+import { ElConfigProvider } from 'element-plus'
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+import { useStore } from './composables/store'
 import { type UserOptions } from '@/composables/store'
 
 const loading = ref(true)
@@ -22,41 +21,14 @@ const sfcOptions: SFCOptionsInstance = {
 
 const initialUserOptions: UserOptions = {}
 
-const pr = new URLSearchParams(location.search).get('pr')
-if (pr) {
-  initialUserOptions.showHidden = true
-  initialUserOptions.styleSource = `https://preview-${pr}-element-plus.surge.sh/bundle/index.css`
-}
-
 const store = useStore({
   serializedState: location.hash.slice(1),
   userOptions: initialUserOptions,
-  pr,
 })
 
-if (pr) {
-  const map: ImportMap = {
-    imports: {
-      'element-plus': `https://preview-${pr}-element-plus.surge.sh/bundle/index.full.min.mjs`,
-      'element-plus/': 'unsupported',
-    },
-  }
-  store.state.files[IMPORT_MAP].code = JSON.stringify(map, undefined, 2)
-  const url = `${location.origin}${location.pathname}#${store.serialize()}`
-  history.replaceState({}, '', url)
-}
-
-if (store.pr) {
-  if (!store.userOptions.value.styleSource)
-    store.userOptions.value.styleSource = `https://preview-${store.pr}-element-plus.surge.sh/bundle/index.css`
-  store.versions.elementPlus = 'preview'
-}
 store.init().then(() => (loading.value = false))
-if (!store.pr && store.userOptions.value.styleSource)
-  store.pr = store.userOptions.value.styleSource.split('-', 2)[1]
 
-// eslint-disable-next-line no-console
-console.log('Store:', store)
+// store.setVersion('3.2.47')
 
 function handleKeydown(evt: KeyboardEvent) {
   if ((evt.ctrlKey || evt.metaKey) && evt.code === 'KeyS')
@@ -67,44 +39,27 @@ const dark = useDark()
 
 // persist state
 watchEffect(() => history.replaceState({}, '', `#${store.serialize()}`))
-
-// ---------test-----------------------
-function fetchVersions() {
-  return useFetch(
-    // https://registry.npmjs.org/@opentiny/vue
-    'https://data.jsdelivr.com/v1/package/npm/@opentiny/vue',
-    {
-      initialData: {},
-
-      // eslint-disable-next-line no-sequences
-      afterFetch: ctx => ((ctx.data = ctx.data.versions), ctx),
-    },
-  ).json<string[]>().data as Ref<string[]>
-}
-const versions = fetchVersions()
-
-const v = computed(() => versions.value.filter(version => gte(version, '3.2.0')))
-// eslint-disable-next-line no-console
-console.log('v', v)
 </script>
 
 <template>
-  <div v-if="!loading" antialiased>
-    <Header :store="store" />
-    <Repl
-      :theme="dark ? 'dark' : 'light'"
-      :store="store"
-      :editor="Monaco"
-      show-compile-output
-      auto-resize
-      :sfc-options="sfcOptions"
-      :clear-console="false"
-      @keydown="handleKeydown"
-    />
-  </div>
-  <template v-else>
-    <div v-loading="{ text: 'Loading...' }" h-100vh />
-  </template>
+  <ElConfigProvider :locale="zhCn">
+    <div v-if="!loading" antialiased>
+      <Header :store="store" />
+      <Repl
+        :theme="dark ? 'dark' : 'light'"
+        :store="store"
+        :editor="Monaco"
+        show-compile-output
+        auto-resize
+        :sfc-options="sfcOptions"
+        :clear-console="false"
+        @keydown="handleKeydown"
+      />
+    </div>
+    <template v-else>
+      <div v-loading="{ text: 'Loading...' }" h-100vh />
+    </template>
+  </ElConfigProvider>
 </template>
 
 <style>

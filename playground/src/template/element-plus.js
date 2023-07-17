@@ -1,5 +1,7 @@
 import { getCurrentInstance } from 'vue'
-import ElementPlus from 'element-plus'
+
+// import ElementPlus from 'element-plus'
+import TinyVue from '@opentiny/vue'
 
 let installed = false
 await loadStyle()
@@ -7,7 +9,7 @@ await loadStyle()
 export function setupElementPlus() {
   if (installed) return
   const instance = getCurrentInstance()
-  instance.appContext.app.use(ElementPlus)
+  instance.appContext.app.use(TinyVue)
   installed = true
 }
 

@@ -64,7 +64,7 @@ export async function compileFile(
   }
 
   const id = hashId(filename)
-  const { errors, descriptor } = store.compiler ? store.compiler.parse(code, {
+  const { errors, descriptor } = getVs(store.vueVersion!) ? store.compiler.parse(code, {
     filename,
     sourceMap: true,
   }) : parse(code, {filename, sourceMap: true})

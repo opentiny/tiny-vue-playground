@@ -110,6 +110,7 @@ export interface Store {
   getTsConfig?: () => any
   initialShowOutput: boolean
   initialOutputMode: OutputModes
+  versions: any
 }
 
 export interface StoreOptions {
@@ -189,6 +190,7 @@ export class ReplStore implements Store {
       this.vueVersion = '3.2.47'
     }
   }
+versions: any;
 
   // don't start compiling until the options are set
   init() {

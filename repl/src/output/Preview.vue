@@ -213,7 +213,7 @@ async function updatePreview() {
       //   `const __modules__ = {};`,
       //   ...ssrModules,
       //   `import { renderToString as _renderToString } from 'vue/server-renderer'
-      //    import { createSSRApp as _createApp } from 'vue'
+      //    import { createSSRApp as _createApp, version } from 'vue';
       //    const AppComponent = __modules__["${mainFile}"].default
       //    AppComponent.name = 'Repl'
       //    const app = _createApp(AppComponent)
@@ -263,11 +263,13 @@ async function updatePreview() {
       }, 1)`,
     ]
 
-    const codeToEval = getVs(store.vueVersion!) === true ? t3 : t2
+    // @ts-ignore
+    const codeToEval = getVs(store.versions.vue!) === true ? t3 : t2
 
     // if main file is a vue file, mount it.
     if (mainFile.endsWith('.vue')) {
-      console.log('实时更改版本', store.vueVersion)
+      // @ts-ignore
+      console.log('实时更改版本', store.versions.vue)
       getVs(store.vueVersion!) === true ?
         codeToEval.push(
         `import { ${

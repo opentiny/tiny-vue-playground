@@ -26,46 +26,66 @@ export function genCdnLink(pkg: string, version: string | undefined, path: strin
 }
 
 export function genVueLink(version: string) {
-  const compilerSfc = genCdnLink('@vue/compiler-sfc', version, '/dist/compiler-sfc.esm-browser.js')
-  const runtimeDom = genCdnLink('@vue/runtime-dom', version, '/dist/runtime-dom.esm-browser.js')
+  let compilerSfc, runtimeDom
+
+  if (version.split('.')[0] === '3') {
+    compilerSfc = genCdnLink('@vue/compiler-sfc', version, '/dist/compiler-sfc.esm-browser.js')
+    runtimeDom = genCdnLink('@vue/runtime-dom', version, '/dist/runtime-dom.esm-browser.js')
+  } else {
+    compilerSfc = genCdnLink('vue', version, '/dist/vue.esm.browser.js')
+    runtimeDom = genCdnLink('vue', version, '/dist/vue.esm.browser.js')
+    // compilerSfc = null
+    // runtimeDom = null
+  }
+
   return {
     compilerSfc,
     runtimeDom
   }
 }
 
-export function genImportMap({ vue, elementPlus }: Partial<Versions> = {}, nightly: boolean): ImportMap {
+export function genImportMap({ vue, elementPlus }: Partial<Versions> = {}, _nightly: boolean): ImportMap {
+  elementPlus = '3.9.1'
+  vue = '3.2.47'
   const deps: Record<string, Dependency> = {
     vue: {
-      pkg: '@vue/runtime-dom',
+      pkg: 'vue',
       version: vue,
-      path: '/dist/runtime-dom.esm-browser.js'
+      path: '/dist/vue.esm-browser.js'
     },
     '@vue/shared': {
       version: vue,
       path: '/dist/shared.esm-bundler.js'
     },
-    'element-plus': {
-      pkg: nightly ? '@element-plus/nightly' : 'element-plus',
+    '@opentiny/vue': {
+      pkg: '@opentiny/vue',
       version: elementPlus,
-      path: '/dist/index.full.min.mjs'
+      path: '/runtime/tiny-vue.mjs'
     },
-    'element-plus/': {
-      pkg: 'element-plus',
+    '@opentiny/vue-common': {
+      pkg: '@opentiny/vue',
       version: elementPlus,
-      path: '/'
+      path: '/runtime/tiny-vue-common.mjs'
     },
-    '@element-plus/icons-vue': {
-      version: '2',
-      path: '/dist/index.min.js'
+    '@opentiny/vue-icon': {
+      pkg: '@opentiny/vue',
+      version: elementPlus,
+      path: '/runtime/tiny-vue-icon.mjs'
+    },
+    '@opentiny/vue-locale': {
+      pkg: '@opentiny/vue',
+      version: elementPlus,
+      path: '/runtime/tiny-vue-locale.mjs'
     }
   }
 
-  return {
+  const map = {
     imports: Object.fromEntries(
       Object.entries(deps).map(([key, dep]) => [key, genCdnLink(dep.pkg ?? key, dep.version, dep.path)])
     )
   }
+
+  return map
 }
 
 export function getVersions(pkg: MaybeRef<string>) {
@@ -78,13 +98,38 @@ export function getVersions(pkg: MaybeRef<string>) {
   }).json<string[]>().data as Ref<string[]>
 }
 
+function isStableVersion(version) {
+  const preReleaseIdentifiers = ['-alpha', '-beta', '-rc'] // 预发布标识符列表
+
+  // 检查版本号中是否包含预发布标识符
+  for (const identifier of preReleaseIdentifiers) {
+    if (version.includes(identifier)) return false // 包含预发布标识符，不是稳定版本
+  }
+
+  return true // 不包含预发布标识符，是稳定版本
+}
+
 export function getSupportedVueVersions() {
   const versions = getVersions('vue')
-  return computed(() => versions.value.filter((version) => gte(version, '3.2.0')))
+  return computed(() =>
+    versions.value.filter((version) => {
+      if (version.startsWith('2.')) {
+        // 对于 Vue 2，只保留稳定版本
+        return isStableVersion(version) && gte(version, '2.6.0')
+      } else if (version.startsWith('3.')) {
+        // 对于 Vue 3，只保留版本号高于等于 3.2.0 的稳定版本
+        return isStableVersion(version) && gte(version, '3.2.0')
+      } else {
+        // 其他版本不符合条件，过滤掉
+        return false
+      }
+    })
+  )
 }
 
 export function getSupportedEpVersions(nightly: MaybeRef<boolean>) {
-  const pkg = computed(() => (unref(nightly) ? '@element-plus/nightly' : 'element-plus'))
+  // const pkg = computed(() => (false ? '@element-plus/nightly' : 'element-plus'))
+  const pkg = '@opentiny/vue'
   const versions = getVersions(pkg)
   return computed(() => {
     if (unref(nightly)) return versions.value

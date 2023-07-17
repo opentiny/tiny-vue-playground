@@ -1,19 +1,13 @@
 <script setup lang="ts">
-import { ref, version as vueVersion } from 'vue'
-import { version as epVersion } from 'element-plus'
-import { ElementPlus } from '@element-plus/icons-vue'
+import { ref } from 'vue'
+
+// 引入 @opentiny/vue 组件
+import { Button as TinyButton } from '@opentiny/vue'
 
 const msg = ref('Hello World!')
 </script>
 
 <template>
   <h1>{{ msg }}</h1>
-  <el-input v-model="msg" />
-
-  <p>
-    <el-icon color="var(--el-color-primary)">
-      <ElementPlus />
-    </el-icon>
-    Element Plus {{ epVersion }} + Vue {{ vueVersion }}
-  </p>
+  <TinyButton>确定</TinyButton>
 </template>

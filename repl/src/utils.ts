@@ -34,5 +34,6 @@ export function atou(base64: string): string {
 
 
 export function getVs(version:string){
+  if(!version) return true
   return Number(version.split('.')[0]) === 3 ? true : false
 }

@@ -1,5 +1,5 @@
 import { File, type Store, type StoreState, compileFile } from 'opentiny-repl'
-import { computed, reactive, ref, shallowRef, watch, watchEffect } from 'vue'
+import { computed, reactive, ref, shallowRef, toRef, watch, watchEffect } from 'vue'
 import { useToggle } from '@vueuse/core'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import mainCode from '../template/main.vue?raw'
@@ -7,7 +7,7 @@ import welcomeCode from '../template/welcome.vue?raw'
 import elementPlusCode from '../template/element-plus.js?raw'
 import tsconfigCode from '../template/tsconfig.json?raw'
 import { atou, utoa } from '@/utils/encode'
-import { genCdnLink, genImportMap, genVueLink } from '@/utils/dependency'
+import { genImportMap, genVueLink } from '@/utils/dependency'
 import { type ImportMap, mergeImportMap } from '@/utils/import-map'
 
 type StoreInstance = typeof Store
@@ -36,7 +36,7 @@ export const IMPORT_MAP = 'import-map.json'
 export const TSCONFIG = 'tsconfig.json'
 
 export function useStore(initial: Initial) {
-  const versions = reactive(initial.versions || { vue: 'latest', elementPlus: 'latest' })
+  const versions = reactive(initial.versions || { vue: '3.2.47', elementPlus: '3.9.1' })
 
   const compiler = shallowRef<typeof import('vue/compiler-sfc')>()
   const [nightly, toggleNightly] = useToggle(false)
@@ -59,7 +59,7 @@ export function useStore(initial: Initial) {
     resetFlip: false
   })
 
-  const bultinImportMap = computed<ImportMap>(() => genImportMap(versions, nightly.value))
+  const bultinImportMap = computed<ImportMap>(() => genImportMap(versions, false))
   const userImportMap = computed<ImportMap>(() => {
     const code = state.files[IMPORT_MAP]?.code.trim()
     if (!code) return {}
@@ -87,7 +87,8 @@ export function useStore(initial: Initial) {
     initialShowOutput: false,
     initialOutputMode: 'preview',
     renameFile,
-    getTsConfig
+    getTsConfig,
+    vueVersion: toRef(versions.vue)
   })
 
   watch(
@@ -99,16 +100,29 @@ export function useStore(initial: Initial) {
         hideFile.value
       )
       state.files[ELEMENT_PLUS_FILE] = file
+      // store.vueVersion = version
       compileFile(store, file).then((errs) => (state.errors = errs))
     },
     { immediate: true }
   )
 
-  function generateElementPlusCode(version: string, styleSource?: string) {
-    const style = styleSource
-      ? styleSource.replace('#VERSION#', version)
-      : genCdnLink(nightly.value ? '@element-plus/nightly' : 'element-plus', version, '/dist/index.css')
-    return elementPlusCode.replace('#STYLE#', style)
+  watch(
+    () => versions.vue,
+    (version) => {
+      const file = new File(
+        ELEMENT_PLUS_FILE,
+        generateElementPlusCode(version, userOptions.value.styleSource).trim(),
+        hideFile.value
+      )
+      state.files[ELEMENT_PLUS_FILE] = file
+      store.vueVersion = version
+      compileFile(store, file).then((errs) => (state.errors = errs))
+    },
+    { immediate: true }
+  )
+
+  function generateElementPlusCode(_version: string, _styleSource?: string) {
+    return elementPlusCode.replace('#STYLE#', 'https://unpkg.com/@opentiny/vue-theme/index.css')
   }
 
   async function setVueVersion(version: string) {
@@ -117,6 +131,7 @@ export function useStore(initial: Initial) {
     compiler.value = await import(/* @vite-ignore */ compilerSfc)
     state.vueRuntimeURL = runtimeDom
     versions.vue = version
+    store.vueVersion = version
 
     // eslint-disable-next-line no-console
     console.info(`[@vue/repl] Now using Vue version: ${version}`)

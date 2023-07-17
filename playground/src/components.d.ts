@@ -7,15 +7,17 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
+    ElButton: typeof import('element-plus/es')['ElButton']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
-    ElMessage: typeof import('element-plus/es')['ElMessage']
+    ElIcon: typeof import('element-plus/es')['ElIcon']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElPopover: typeof import('element-plus/es')['ElPopover']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElTag: typeof import('element-plus/es')['ElTag']
     Header: typeof import('./components/Header.vue')['default']
+    RouterLink: typeof import('vue-router')['RouterLink']
+    RouterView: typeof import('vue-router')['RouterView']
     Settings: typeof import('./components/Settings.vue')['default']
   }
   export interface ComponentCustomProperties {
