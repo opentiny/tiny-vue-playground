@@ -43,11 +43,6 @@ export default defineConfig({
     exclude: ['opentiny-repl']
   },
   build: {
-    rollupOptions: {
-      external: [
-        'opentiny-repl/style.css'
-        // 添加其他需要外部化的模块
-      ]
-    }
+    outDir: path.resolve(__dirname, '../dist') // 设置打包输出的目录，这里设置为 dist 目录
   }
 })
