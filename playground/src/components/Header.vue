@@ -4,7 +4,7 @@ import { ElMessage, ElSelect } from 'element-plus'
 
 import { useDark, useToggle } from '@vueuse/core'
 import Share from '../icons/Share.vue'
-import GitHub from '../icons/GitHub.vue'
+import GitHub from '../icons/Github.vue'
 import Sun from '../icons/Sun.vue'
 import Moon from '../icons/Moon.vue'
 import { type ReplStore, type VersionKey } from '@/composables/store'
