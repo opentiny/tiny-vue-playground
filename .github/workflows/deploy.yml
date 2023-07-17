@@ -30,4 +30,4 @@ jobs:
         with:
           BRANCH: gh-pages
           repositoryName: mengqiuleo/opentiny-playground
-          FOLDER: playground/dist
+          FOLDER: dist
