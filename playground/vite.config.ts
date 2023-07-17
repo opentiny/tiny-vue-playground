@@ -41,5 +41,13 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: ['opentiny-repl']
+  },
+  build: {
+    rollupOptions: {
+      external: [
+        'opentiny-repl/style.css'
+        // 添加其他需要外部化的模块
+      ]
+    }
   }
 })
