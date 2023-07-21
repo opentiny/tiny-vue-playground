@@ -45,11 +45,6 @@ async function setVersion(key: VersionKey, v: string) {
   versions[key].active = v
 }
 
-// function toggleNightly() {
-//   store.toggleNightly(nightly.value)
-//   setVersion('elementPlus', 'latest')
-// }
-
 async function copyLink() {
   await navigator.clipboard.writeText(location.href)
   ElMessage.success('Sharable URL has been copied to clipboard.')

@@ -107,7 +107,8 @@ function isStableVersion(version) {
   // 检查版本号中是否包含预发布标识符
   for (const identifier of preReleaseIdentifiers) {
     if (version.includes(identifier)) return false
-  } // 包含预发布标识符，不是稳定版本
+  }
+  // 包含预发布标识符，不是稳定版本
 
   return true // 不包含预发布标识符，是稳定版本
 }

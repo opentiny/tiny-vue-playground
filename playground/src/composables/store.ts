@@ -100,6 +100,8 @@ export function useStore(initial: Initial) {
         hideFile.value
       )
       state.files[ELEMENT_PLUS_FILE] = file
+      // eslint-disable-next-line no-console
+      console.log('change', importMap)
       // store.vueVersion = version
       compileFile(store, file).then((errs) => (state.errors = errs))
     },
@@ -116,6 +118,8 @@ export function useStore(initial: Initial) {
       )
       state.files[ELEMENT_PLUS_FILE] = file
       store.vueVersion = version
+      // eslint-disable-next-line no-console
+      console.log('change', importMap)
       compileFile(store, file).then((errs) => (state.errors = errs))
     },
     { immediate: true }
