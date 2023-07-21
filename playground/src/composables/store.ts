@@ -108,22 +108,22 @@ export function useStore(initial: Initial) {
     { immediate: true }
   )
 
-  watch(
-    () => versions.vue,
-    (version) => {
-      const file = new File(
-        ELEMENT_PLUS_FILE,
-        generateElementPlusCode(version, userOptions.value.styleSource).trim(),
-        hideFile.value
-      )
-      state.files[ELEMENT_PLUS_FILE] = file
-      store.vueVersion = version
-      // eslint-disable-next-line no-console
-      console.log('change', importMap)
-      compileFile(store, file).then((errs) => (state.errors = errs))
-    },
-    { immediate: true }
-  )
+  // watch(
+  //   () => versions.vue,
+  //   (version) => {
+  //     const file = new File(
+  //       ELEMENT_PLUS_FILE,
+  //       generateElementPlusCode(version, userOptions.value.styleSource).trim(),
+  //       hideFile.value,
+  //     )
+  //     state.files[ELEMENT_PLUS_FILE] = file
+  //     store.vueVersion = version
+  //     // eslint-disable-next-line no-console
+  //     console.log('change', importMap)
+  //     compileFile(store, file).then(errs => (state.errors = errs))
+  //   },
+  //   { immediate: true },
+  // )
 
   function generateElementPlusCode(_version: string, _styleSource?: string) {
     return elementPlusCode.replace('#STYLE#', 'https://unpkg.com/@opentiny/vue-theme/index.css')
@@ -138,7 +138,7 @@ export function useStore(initial: Initial) {
     store.vueVersion = version
 
     // eslint-disable-next-line no-console
-    console.info(`[@vue/repl] Now using Vue version: ${version}`)
+    console.info(`[@vue/repl-playground] Now using Vue version: ${version}`)
   }
 
   async function init() {
