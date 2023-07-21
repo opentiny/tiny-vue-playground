@@ -9,5 +9,6 @@ const msg = ref('Hello World!')
 
 <template>
   <h1>{{ msg }}</h1>
+  <button>123</button>
   <TinyButton>确定</TinyButton>
 </template>
