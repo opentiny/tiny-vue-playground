@@ -43,6 +43,7 @@ async function setVersion(key: VersionKey, v: string) {
   versions[key].active = 'loading...'
   // eslint-disable-next-line no-console
   console.log('change', key, v)
+  ElMessage.success(`${key} + ${v}`)
   await store.setVersion(key, v)
   versions[key].active = v
 }
