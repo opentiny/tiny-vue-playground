@@ -130,6 +130,8 @@ export function useStore(initial: Initial) {
   }
 
   async function setVueVersion(version: string) {
+    // eslint-disable-next-line no-console
+    console.log('change-真正设置的version', version)
     const { compilerSfc, runtimeDom } = genVueLink(version)
 
     compiler.value = await import(/* @vite-ignore */ compilerSfc)

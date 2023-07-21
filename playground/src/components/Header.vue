@@ -41,6 +41,8 @@ const versions = reactive<Record<VersionKey, Version>>({
 
 async function setVersion(key: VersionKey, v: string) {
   versions[key].active = 'loading...'
+  // eslint-disable-next-line no-console
+  console.log('change', key, v)
   await store.setVersion(key, v)
   versions[key].active = v
 }
