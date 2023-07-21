@@ -4,7 +4,7 @@ import { ref } from 'vue'
 // 引入 @opentiny/vue 组件
 import { Button as TinyButton } from '@opentiny/vue'
 
-const msg = ref('Hello World!')
+const msg = ref('Hello World!123')
 </script>
 
 <template>
