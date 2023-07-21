@@ -60,7 +60,7 @@ async function copyLink() {
       <img h-35px relative mr-2 v="mid" top="2px" alt="logo" src="../assets/logo.png">
       <div lt-sm-hidden flex="~ gap-1" items-center>
         <div text-xl>
-          OpenTiny Playground
+          OpenTiny Playground123
         </div>
       </div>
     </div>
