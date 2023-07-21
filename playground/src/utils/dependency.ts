@@ -45,13 +45,16 @@ export function genVueLink(version: string) {
 }
 
 export function genImportMap({ vue, elementPlus }: Partial<Versions> = {}, _nightly: boolean): ImportMap {
-  elementPlus = '3.9.1'
-  vue = '3.2.47'
+  const isV3Path = vue
+    ? vue.split('.')[0] === '3'
+      ? '/dist/vue.esm-browser.js'
+      : '/dist/vue.esm.browser.js'
+    : '/dist/vue.esm-browser.js'
   const deps: Record<string, Dependency> = {
     vue: {
       pkg: 'vue',
       version: vue,
-      path: '/dist/vue.esm-browser.js'
+      path: isV3Path
     },
     '@vue/shared': {
       version: vue,
@@ -103,8 +106,8 @@ function isStableVersion(version) {
 
   // 检查版本号中是否包含预发布标识符
   for (const identifier of preReleaseIdentifiers) {
-    if (version.includes(identifier)) return false // 包含预发布标识符，不是稳定版本
-  }
+    if (version.includes(identifier)) return false
+  } // 包含预发布标识符，不是稳定版本
 
   return true // 不包含预发布标识符，是稳定版本
 }
