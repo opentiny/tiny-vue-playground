@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type ComputedRef, reactive, ref } from 'vue'
+import { type ComputedRef, reactive } from 'vue'
 import { ElMessage, ElSelect } from 'element-plus'
 import { useDark, useToggle } from '@vueuse/core'
 import Share from '../icons/Share.vue'
@@ -7,13 +7,12 @@ import GitHub from '../icons/Github.vue'
 import Sun from '../icons/Sun.vue'
 import Moon from '../icons/Moon.vue'
 import { type ReplStore, type VersionKey } from '@/composables/store'
-import { getSupportedEpVersions, getSupportedVueVersions } from '@/utils/dependency'
+import { getSupportedOpVersions, getSupportedVueVersions } from '@/utils/dependency'
 
 const { store } = defineProps<{
   store: ReplStore
 }>()
 
-const nightly = ref(false)
 const dark = useDark()
 const toggleDark = useToggle(dark)
 
@@ -26,7 +25,7 @@ interface Version {
 const versions = reactive<Record<VersionKey, Version>>({
   openTiny: {
     text: 'OpenTiny',
-    published: getSupportedEpVersions(nightly),
+    published: getSupportedOpVersions(),
     active: store.versions.openTiny,
   },
   vue: {

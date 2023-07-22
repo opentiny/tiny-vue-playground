@@ -42,7 +42,7 @@ export function genVueLink(version: string) {
   }
 }
 
-export function genImportMap({ vue, openTiny }: Partial<Versions> = {}, _nightly: boolean): ImportMap {
+export function genImportMap({ vue, openTiny }: Partial<Versions> = {}): ImportMap {
   const isV3Path = vue
     ? vue.split('.')[0] === '3'
       ? '/dist/vue.esm-browser.js'
@@ -129,11 +129,10 @@ export function getSupportedVueVersions() {
   )
 }
 
-export function getSupportedEpVersions(nightly: MaybeRef<boolean>) {
+export function getSupportedOpVersions() {
   const pkg = '@opentiny/vue'
   const versions = getVersions(pkg)
   return computed(() => {
-    if (unref(nightly)) return versions.value
-    return versions.value.filter((version) => gte(version, '1.1.0-beta.18'))
+    return versions.value.filter((version) => gte(version, '0.0.0'))
   })
 }
