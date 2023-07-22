@@ -1,5 +1,5 @@
 import { File, type Store, type StoreState, compileFile } from 'opentiny-repl'
-import { computed, reactive, ref, shallowRef, toRef, watch, watchEffect } from 'vue'
+import { computed, reactive, ref, shallowRef, watch, watchEffect } from 'vue'
 import { useToggle } from '@vueuse/core'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import mainCode from '../template/main.vue?raw'
@@ -57,7 +57,7 @@ export function useStore(initial: Initial) {
     resetFlip: false
   })
 
-  const bultinImportMap = computed<ImportMap>(() => genImportMap(versions, false))
+  const bultinImportMap = computed<ImportMap>(() => genImportMap(versions))
   const userImportMap = computed<ImportMap>(() => {
     const code = state.files[IMPORT_MAP]?.code.trim()
     if (!code) return {}
@@ -70,6 +70,7 @@ export function useStore(initial: Initial) {
     return map
   })
   const importMap = computed<ImportMap>(() => mergeImportMap(bultinImportMap.value, userImportMap.value))
+  const vueVersion = computed<string>(() => versions.vue)
 
   console.log('Files:', state.files, 'Options:', userOptions)
 
@@ -85,7 +86,7 @@ export function useStore(initial: Initial) {
     initialOutputMode: 'preview',
     renameFile,
     getTsConfig,
-    vueVersion: toRef(versions.vue)
+    vueVersion
   })
 
   watch(
@@ -109,7 +110,6 @@ export function useStore(initial: Initial) {
     compiler.value = await import(/* @vite-ignore */ compilerSfc)
     state.vueRuntimeURL = runtimeDom
     versions.vue = version
-    store.vueVersion = version
 
     console.info(`[opentiny-playground] Now using Vue version: ${version}`)
   }
@@ -258,11 +258,9 @@ export function useStore(initial: Initial) {
 
   return {
     ...store,
-
     versions,
     nightly,
     userOptions,
-
     init,
     serialize,
     setVersion,
