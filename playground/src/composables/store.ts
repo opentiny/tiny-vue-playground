@@ -4,7 +4,7 @@ import { useToggle } from '@vueuse/core'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import mainCode from '../template/main.vue?raw'
 import welcomeCode from '../template/welcome.vue?raw'
-import elementPlusCode from '../template/element-plus.js?raw'
+import openTinyCode from '../template/opentiny.js?raw'
 import tsconfigCode from '../template/tsconfig.json?raw'
 import { atou, utoa } from '@/utils/encode'
 import { genImportMap, genVueLink } from '@/utils/dependency'
@@ -16,9 +16,8 @@ export interface Initial {
   serializedState?: string
   versions?: Versions
   userOptions?: UserOptions
-  pr?: string | null
 }
-export type VersionKey = 'vue' | 'elementPlus'
+export type VersionKey = 'vue' | 'openTiny'
 export type Versions = Record<VersionKey, string>
 export interface UserOptions {
   styleSource?: string
@@ -30,18 +29,17 @@ export type SerializeState = Record<string, string> & {
 
 const MAIN_FILE = 'src/PlaygroundMain.vue'
 const APP_FILE = 'src/App.vue'
-const ELEMENT_PLUS_FILE = 'src/element-plus.js'
+const OpenTiny_FILE = 'src/opentiny.js'
 const LEGACY_IMPORT_MAP = 'src/import_map.json'
 export const IMPORT_MAP = 'import-map.json'
 export const TSCONFIG = 'tsconfig.json'
 
 export function useStore(initial: Initial) {
-  const versions = reactive(initial.versions || { vue: '3.2.47', elementPlus: '3.9.1' })
+  const versions = reactive(initial.versions || { vue: '3.2.47', openTiny: '3.9.1' })
 
   const compiler = shallowRef<typeof import('vue/compiler-sfc')>()
   const [nightly, toggleNightly] = useToggle(false)
   const userOptions = ref<UserOptions>(initial.userOptions || {})
-  // const hideFile = computed(() => !IS_DEV && !userOptions.value.showHidden)
   const hideFile = ref(true)
 
   const _files = initFiles(initial.serializedState || '')
@@ -73,7 +71,6 @@ export function useStore(initial: Initial) {
   })
   const importMap = computed<ImportMap>(() => mergeImportMap(bultinImportMap.value, userImportMap.value))
 
-  // eslint-disable-next-line no-console
   console.log('Files:', state.files, 'Options:', userOptions)
 
   const store: StoreInstance = reactive({
@@ -92,46 +89,21 @@ export function useStore(initial: Initial) {
   })
 
   watch(
-    () => versions.elementPlus,
-    (version) => {
-      const file = new File(
-        ELEMENT_PLUS_FILE,
-        generateElementPlusCode(version, userOptions.value.styleSource).trim(),
-        hideFile.value
-      )
-      state.files[ELEMENT_PLUS_FILE] = file
-      // eslint-disable-next-line no-console
-      console.log('change', importMap)
-      // store.vueVersion = version
+    () => versions.openTiny,
+    () => {
+      const file = new File(OpenTiny_FILE, generateOpenTinyCode().trim(), hideFile.value)
+      state.files[OpenTiny_FILE] = file
+
       compileFile(store, file).then((errs) => (state.errors = errs))
     },
     { immediate: true }
   )
 
-  // watch(
-  //   () => versions.vue,
-  //   (version) => {
-  //     const file = new File(
-  //       ELEMENT_PLUS_FILE,
-  //       generateElementPlusCode(version, userOptions.value.styleSource).trim(),
-  //       hideFile.value,
-  //     )
-  //     state.files[ELEMENT_PLUS_FILE] = file
-  //     store.vueVersion = version
-  //     // eslint-disable-next-line no-console
-  //     console.log('change', importMap)
-  //     compileFile(store, file).then(errs => (state.errors = errs))
-  //   },
-  //   { immediate: true },
-  // )
-
-  function generateElementPlusCode(_version: string, _styleSource?: string) {
-    return elementPlusCode.replace('#STYLE#', 'https://unpkg.com/@opentiny/vue-theme/index.css')
+  function generateOpenTinyCode() {
+    return openTinyCode.replace('#STYLE#', 'https://unpkg.com/@opentiny/vue-theme/index.css')
   }
 
   async function setVueVersion(version: string) {
-    // eslint-disable-next-line no-console
-    console.log('change-真正设置的version', version)
     const { compilerSfc, runtimeDom } = genVueLink(version)
 
     compiler.value = await import(/* @vite-ignore */ compilerSfc)
@@ -139,8 +111,7 @@ export function useStore(initial: Initial) {
     versions.vue = version
     store.vueVersion = version
 
-    // eslint-disable-next-line no-console
-    console.info(`[@vue/repl-playground] Now using Vue version: ${version}`)
+    console.info(`[opentiny-playground] Now using Vue version: ${version}`)
   }
 
   async function init() {
@@ -220,7 +191,7 @@ export function useStore(initial: Initial) {
       return
     }
 
-    if (file.hidden || [APP_FILE, MAIN_FILE, ELEMENT_PLUS_FILE, IMPORT_MAP].includes(oldFilename)) {
+    if (file.hidden || [APP_FILE, MAIN_FILE, OpenTiny_FILE, IMPORT_MAP].includes(oldFilename)) {
       state.errors = [`Cannot rename ${oldFilename}`]
       return
     }
@@ -240,8 +211,8 @@ export function useStore(initial: Initial) {
   }
 
   async function deleteFile(filename: string) {
-    if ([ELEMENT_PLUS_FILE, MAIN_FILE, APP_FILE, ELEMENT_PLUS_FILE, IMPORT_MAP].includes(filename)) {
-      ElMessage.warning('You cannot remove it, because Element Plus requires it.')
+    if ([OpenTiny_FILE, MAIN_FILE, APP_FILE, OpenTiny_FILE, IMPORT_MAP].includes(filename)) {
+      ElMessage.warning('You cannot remove it, because OpenTiny requires it.')
       return
     }
 
@@ -272,8 +243,8 @@ export function useStore(initial: Initial) {
 
   async function setVersion(key: VersionKey, version: string) {
     switch (key) {
-      case 'elementPlus':
-        setElementPlusVersion(version)
+      case 'openTiny':
+        setOpenTinyVersion(version)
         break
       case 'vue':
         await setVueVersion(version)
@@ -281,8 +252,8 @@ export function useStore(initial: Initial) {
     }
   }
 
-  function setElementPlusVersion(version: string) {
-    versions.elementPlus = version
+  function setOpenTinyVersion(version: string) {
+    versions.openTiny = version
   }
 
   return {
@@ -295,8 +266,7 @@ export function useStore(initial: Initial) {
     init,
     serialize,
     setVersion,
-    toggleNightly,
-    pr: initial.pr
+    toggleNightly
   }
 }
 

@@ -34,8 +34,6 @@ export function genVueLink(version: string) {
   } else {
     compilerSfc = genCdnLink('vue', version, '/dist/vue.esm.browser.js')
     runtimeDom = genCdnLink('vue', version, '/dist/vue.esm.browser.js')
-    // compilerSfc = null
-    // runtimeDom = null
   }
 
   return {
@@ -44,14 +42,14 @@ export function genVueLink(version: string) {
   }
 }
 
-export function genImportMap({ vue, elementPlus }: Partial<Versions> = {}, _nightly: boolean): ImportMap {
+export function genImportMap({ vue, openTiny }: Partial<Versions> = {}, _nightly: boolean): ImportMap {
   const isV3Path = vue
     ? vue.split('.')[0] === '3'
       ? '/dist/vue.esm-browser.js'
       : '/dist/vue.esm.browser.js'
     : '/dist/vue.esm-browser.js'
   const deps: Record<string, Dependency> = {
-    vue: {
+    'vue': {
       pkg: 'vue',
       version: vue,
       path: isV3Path
@@ -62,22 +60,22 @@ export function genImportMap({ vue, elementPlus }: Partial<Versions> = {}, _nigh
     },
     '@opentiny/vue': {
       pkg: '@opentiny/vue',
-      version: elementPlus,
+      version: openTiny,
       path: '/runtime/tiny-vue.mjs'
     },
     '@opentiny/vue-common': {
       pkg: '@opentiny/vue',
-      version: elementPlus,
+      version: openTiny,
       path: '/runtime/tiny-vue-common.mjs'
     },
     '@opentiny/vue-icon': {
       pkg: '@opentiny/vue',
-      version: elementPlus,
+      version: openTiny,
       path: '/runtime/tiny-vue-icon.mjs'
     },
     '@opentiny/vue-locale': {
       pkg: '@opentiny/vue',
-      version: elementPlus,
+      version: openTiny,
       path: '/runtime/tiny-vue-locale.mjs'
     }
   }
@@ -110,7 +108,6 @@ function isStableVersion(version) {
   }
 
   // 包含预发布标识符，不是稳定版本
-
   return true // 不包含预发布标识符，是稳定版本
 }
 
@@ -133,7 +130,6 @@ export function getSupportedVueVersions() {
 }
 
 export function getSupportedEpVersions(nightly: MaybeRef<boolean>) {
-  // const pkg = computed(() => (false ? '@element-plus/nightly' : 'element-plus'))
   const pkg = '@opentiny/vue'
   const versions = getVersions(pkg)
   return computed(() => {

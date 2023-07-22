@@ -24,10 +24,10 @@ interface Version {
 }
 
 const versions = reactive<Record<VersionKey, Version>>({
-  elementPlus: {
+  openTiny: {
     text: 'OpenTiny',
     published: getSupportedEpVersions(nightly),
-    active: store.versions.elementPlus,
+    active: store.versions.openTiny,
   },
   vue: {
     text: 'Vue',

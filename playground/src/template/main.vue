@@ -1,8 +1,8 @@
 <script setup>
 import App from './App.vue'
-import { setupElementPlus } from './element-plus.js'
+import { setupOpenTiny } from './opentiny.js'
 
-setupElementPlus()
+setupOpenTiny()
 </script>
 
 <template>
