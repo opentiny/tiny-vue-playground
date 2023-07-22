@@ -14,6 +14,10 @@ import {
 import { transform } from 'sucrase'
 // @ts-ignore
 import hashId from 'hash-sum'
+import less from 'less'
+// import sass from 'sass'
+import { renderSync } from 'sass'
+import {compile} from 'sass'
 
 export const COMP_IDENTIFIER = `__sfc__`
 
@@ -48,6 +52,23 @@ export async function compileFile(
 
   if (filename.endsWith('.css')) {
     compiled.css = code
+    return []
+  }
+
+  // 加入 less文件判断
+  if (filename.endsWith('.less')) {
+    const outStyle = await less.render(code) // 使用less.render将 less code 转换成css
+    compiled.css = outStyle.css
+    store.state.errors = []
+    return []
+  }
+  // 加入 sass/scss文件判断
+  if (filename.endsWith('.sass') || filename.endsWith('.scss')) {
+    // const outStyle = renderSync({ data: code }); 
+    const outStyle = compile(code)
+    console.log('constyle', outStyle)
+    compiled.css = outStyle.css;
+    store.state.errors = []
     return []
   }
 
@@ -88,9 +109,9 @@ export async function compileFile(
   }
 
   if (
-    descriptor.styles.some((s) => s.lang) ||
+    // descriptor.styles.some((s) => s.lang) || // 主要移除这段代码
     (descriptor.template && descriptor.template.lang)
-  ) {
+  ){
     return [
       `lang="x" pre-processors for <template> or <style> are currently not ` +
         `supported.`,
@@ -212,10 +233,23 @@ export async function compileFile(
       return [`<style module> is not supported in the playground.`]
     }
 
+    // 添加新代码
+    let contentStyle = style.content
+    if (style.lang === 'less') {
+      const outStyle = await less.render(contentStyle)
+      contentStyle = outStyle.css
+    } else if(style.lang === 'sass' || style.lang === 'scss'){
+      // const outStyle = renderSync({ data: code });
+      const outStyle = compile(code)
+      console.log('constyle', outStyle)
+      contentStyle = outStyle.css;
+    }
+
     // const styleResult = await store.compiler.compileStyleAsync({
+    //* vue2 和 vue3 统一使用vue3的css编译器，得到的结果一致
     const styleResult = await compileStyleAsync({
       ...store.options?.style,
-      source: style.content,
+      source: contentStyle,
       filename,
       id,
       scoped: style.scoped,

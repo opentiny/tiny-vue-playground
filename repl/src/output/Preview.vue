@@ -241,11 +241,15 @@ async function updatePreview() {
     )
 
     const t2 = [
-      `window.__modules__ = {};window.__css__ = '';` +
+      `window.__modules__ = {};window.__css__ = [];` +
       `if (window.__app__) window.__app__.$destroy();` +
       `document.body.innerHTML = '<div id="app"></div>'`,
       ...modules,
-      `document.getElementById('__sfc-styles').innerHTML = window.__css__`
+      // `document.getElementById('__sfc-styles').innerHTML = window.__css__`
+      `setTimeout(()=> {
+        document.querySelectorAll('style[css]').forEach(el => el.remove())
+        document.head.insertAdjacentHTML('beforeend', window.__css__.map(s => \`<style css>\${s}</style>\`).join('\\n'))
+      }, 1)`
     ]
 
     const t3 = [

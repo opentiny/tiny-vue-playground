@@ -62,7 +62,7 @@ function doneNameFile() {
   const filename = 'src/' + pendingFilename.value
   const oldFilename = pending.value === true ? '' : pending.value
 
-  if (!/\.(vue|js|ts|css|json)$/.test(filename)) {
+  if (!/\.(vue|js|ts|css|json|less|sass|scss)$/.test(filename)) { // 添加 |less
     store.state.errors = [
       `Playground only supports *.vue, *.js, *.ts, *.css, *.json files.`,
     ]

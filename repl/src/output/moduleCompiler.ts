@@ -9,7 +9,7 @@ import {
   isStaticProperty,
 } from 'vue/compiler-sfc'
 import { ExportSpecifier, Identifier, Node } from '@babel/types'
-import { getVs } from '../utils'
+// import { getVs } from '../utils'
 
 export function compileModulesForPreview(store: Store, isSSR = false) {
   const seen = new Set<File>()
@@ -28,11 +28,12 @@ export function compileModulesForPreview(store: Store, isSSR = false) {
       if (filename.endsWith('.css')) {
         const file = store.state.files[filename]
         if (!seen.has(file)) {
-          getVs(store.versions.vue!) ? processed.push(
-            `\nwindow.__css__.push(${JSON.stringify(file.compiled.css)})`
-          ) : processed.push(
-            `\nwindow.__css__ += ${JSON.stringify(file.compiled.css)}`
-          )
+          // getVs(store.versions.vue!) ? processed.push(
+          //   `\nwindow.__css__.push(${JSON.stringify(file.compiled.css)})`
+          // ) : processed.push(
+          //   `\nwindow.__css__ += ${JSON.stringify(file.compiled.css)}`
+          // )
+          processed.push(`\nwindow.__css__.push(${JSON.stringify(file.compiled.css)})`)
         }
       }
     }
@@ -82,8 +83,10 @@ function processFile(
   )
   // append css
   if (file.compiled.css && !isSSR) {
-    getVs(store.versions.vue!) ? js += `\nwindow.__css__.push(${JSON.stringify(file.compiled.css)})` :
-        js += `\nwindow.__css__ += ${JSON.stringify(file.compiled.css)}`
+    // getVs(store.versions.vue!) ? js += `\nwindow.__css__.push(${JSON.stringify(file.compiled.css)})` :
+    //     js += `\nwindow.__css__ += ${JSON.stringify(file.compiled.css)}`
+     js += `\nwindow.__css__.push(${JSON.stringify(file.compiled.css)})` 
+        
   }
 
   // push self
