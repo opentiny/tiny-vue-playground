@@ -35,6 +35,7 @@ export async function compileFile(
     eval(scriptCode);
   }
 
+  //TODO: template已实现支持vue2，doCompileScript未实现
   console.log('vue-template-compiler', getVs(store.vueVersion!))
   //@ts-ignore
   const res = getVs(store.vueVersion!) === false && window.VueTemplateCompiler.parseComponent(code)
