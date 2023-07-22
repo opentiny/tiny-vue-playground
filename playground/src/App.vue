@@ -3,8 +3,6 @@ import { Repl, type SFCOptions } from 'opentiny-repl'
 import Monaco from 'opentiny-repl/monaco-editor'
 import { ref, watchEffect } from 'vue'
 import { useDark } from '@vueuse/core'
-import { ElConfigProvider } from 'element-plus'
-import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { useStore } from './composables/store'
 import { type UserOptions } from '@/composables/store'
 
@@ -28,8 +26,6 @@ const store = useStore({
 
 store.init().then(() => (loading.value = false))
 
-// store.setVersion('3.2.47')
-
 function handleKeydown(evt: KeyboardEvent) {
   if ((evt.ctrlKey || evt.metaKey) && evt.code === 'KeyS')
     evt.preventDefault()
@@ -42,7 +38,7 @@ watchEffect(() => history.replaceState({}, '', `#${store.serialize()}`))
 </script>
 
 <template>
-  <ElConfigProvider :locale="zhCn">
+  <ElConfigProvider>
     <div v-if="!loading" antialiased>
       <Header :store="store" />
       <Repl
@@ -72,12 +68,12 @@ body {
 }
 
 .vue-repl {
-  height: calc(100vh - var(--nav-height)) !important;
+  height: calc(100vh - 50px) !important;
 }
 
 .dark .vue-repl,
 .vue-repl {
-  --color-branding: var(--el-color-primary) !important;
+  --color-branding: #5e7ce0 !important;
 }
 
 .dark body {

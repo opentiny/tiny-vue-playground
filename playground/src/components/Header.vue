@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { type ComputedRef, reactive, ref } from 'vue'
 import { ElMessage, ElSelect } from 'element-plus'
-
 import { useDark, useToggle } from '@vueuse/core'
 import Share from '../icons/Share.vue'
 import GitHub from '../icons/Github.vue'
@@ -13,8 +12,6 @@ import { getSupportedEpVersions, getSupportedVueVersions } from '@/utils/depende
 const { store } = defineProps<{
   store: ReplStore
 }>()
-// const appVersion = import.meta.env.APP_VERSION
-// const replVersion = import.meta.env.REPL_VERSION
 
 const nightly = ref(false)
 const dark = useDark()
@@ -41,9 +38,6 @@ const versions = reactive<Record<VersionKey, Version>>({
 
 async function setVersion(key: VersionKey, v: string) {
   versions[key].active = 'loading...'
-  // eslint-disable-next-line no-console
-  console.log('change', key, v)
-  ElMessage.success(`${key} + ${v}`)
   await store.setVersion(key, v)
   versions[key].active = v
 }
@@ -56,11 +50,11 @@ async function copyLink() {
 
 <template>
   <nav>
-    <div leading="[var(--nav-height)]" m-0 flex items-center font-medium>
+    <div m-0 flex items-center font-medium>
       <img h-35px relative mr-2 v="mid" top="2px" alt="logo" src="../assets/logo.png">
       <div lt-sm-hidden flex="~ gap-1" items-center>
         <div text-xl>
-          OpenTiny Playground123
+          OpenTiny Playground
         </div>
       </div>
     </div>
@@ -81,41 +75,15 @@ async function copyLink() {
         </ElSelect>
       </div>
 
-      <div flex="~ gap-4" class="icons">
-        <!-- <el-button link :icon="Edit" /> -->
-        <!-- <button text-lg i-ri-share-line @click="copyLink">
-          <Share />
-        </button> -->
-        <!-- <button
-          title="Toggle dark mode"
-          class="toggle-dark"
-          @click="toggleDark()"
-        >
+      <div flex="~ gap-4">
+        <Share @click="copyLink" />
+        <div title="Toggle dark mode" class="toggle-dark" @click="toggleDark()">
           <Sun class="light" />
           <Moon class="dark" />
-        </button> -->
-        <!-- <button>
-          <a
-            href="https://github.com/ChaiMayor/hview-ui/tree/dev"
-            target="_blank"
-          >
-            <GitHub />
-          </a>
-        </button> -->
-        <el-icon :size="18" @click="copyLink">
-          <Share />
-        </el-icon>
-        <div title="Toggle dark mode" class="toggle-dark" @click="toggleDark()">
-          <el-icon :size="24" class="light">
-            <Sun />
-          </el-icon>
-          <el-icon :size="24" class="dark">
-            <Moon />
-          </el-icon>
         </div>
-        <el-icon :size="24">
-          <a href="https://github.com/mengqiuleo/opentiny-playground" target="_blank" flex hover:color-primary><GitHub /></a>
-        </el-icon>
+        <a href="https://github.com/mengqiuleo/opentiny-playground" target="_blank">
+          <GitHub style="width: 1.7em; height: 1.7em" />
+        </a>
       </div>
     </div>
   </nav>
@@ -126,19 +94,17 @@ nav {
   --bg: #fff;
   --bg-light: #fff;
   --border: #ddd;
-
   --at-apply: 'box-border flex justify-between px-4 z-999 relative';
 
   height: var(--nav-height);
   background-color: var(--bg);
-  box-shadow: 0 0 6px var(--el-color-primary);
+  box-shadow: 0 0 6px #5e7ce0;
 }
 
 .dark nav {
   --bg: #1a1a1a;
   --bg-light: #242424;
   --border: #383838;
-
   --at-apply: 'shadow-none';
   border-bottom: 1px solid var(--border);
 }
@@ -207,37 +173,6 @@ h1 img {
   }
 }
 
-.links {
-  display: flex;
-}
-
-.version {
-  margin-right: 12px;
-  position: relative;
-}
-
-.active-version {
-  cursor: pointer;
-  position: relative;
-  display: inline-flex;
-  place-items: center;
-}
-
-.active-version .number {
-  color: var(--green);
-  margin-left: 4px;
-}
-
-.active-version::after {
-  content: '';
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 6px solid #aaa;
-  margin-left: 8px;
-}
-
 .toggle-dev span,
 .toggle-ssr span {
   font-size: 12px;
@@ -254,15 +189,6 @@ h1 img {
   background: var(--green);
 }
 
-.toggle-ssr span {
-  background-color: var(--btn-bg);
-}
-
-.toggle-ssr.enabled span {
-  color: #fff;
-  background-color: var(--green);
-}
-
 .toggle-dark svg {
   width: 18px;
   height: 18px;
@@ -277,118 +203,10 @@ h1 img {
   display: inline-block;
 }
 
-.links button,
-.links button a {
-  color: var(--btn);
-}
-
-.links button:hover,
-.links button:hover a {
-  color: var(--highlight);
-}
-
-.version:hover .active-version::after {
-  border-top-color: var(--btn);
-}
-
-.dark .version:hover .active-version::after {
-  border-top-color: var(--highlight);
-}
-
-.versions {
-  display: none;
-  position: absolute;
-  left: 0;
-  top: 40px;
-  background-color: var(--bg-light);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  list-style-type: none;
-  padding: 8px;
-  margin: 0;
-  width: 200px;
-  max-height: calc(100vh - 70px);
-  overflow: scroll;
-}
-
-.versions a {
-  display: block;
-  padding: 6px 12px;
-  text-decoration: none;
-  cursor: pointer;
-  color: var(--base);
-}
-
-.versions a:hover {
-  color: var(--green);
-}
-
-.versions.expanded {
-  display: block;
-}
-
-.links > * {
-  display: flex;
-  align-items: center;
-}
-
-.links > * + * {
-  margin-left: 4px;
-}
-
-.r-right {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  flex-direction: row;
-}
-.r-right-box {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  flex-direction: row;
-}
-
 html.dark {
   .div {
-    button {
-      font-size: 16px;
-      margin-right: 6px;
-      a {
-        svg {
-          width: 20px;
-          height: 20px;
-        }
-      }
-      svg {
-        width: 16px;
-        height: 16px;
-        color: #fff;
-      }
-    }
-  }
-}
-
-.icons {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  flex-direction: row;
-  margin-top: 1px;
-  svg {
-    width: 16px;
-    height: 16px;
-    color: #242424;
-  }
-  div {
     font-size: 16px;
     margin-right: 6px;
-    &:last-of-type {
-      svg {
-        width: 19px;
-        height: 19px;
-      }
-    }
     a {
       svg {
         width: 20px;
@@ -398,7 +216,7 @@ html.dark {
     svg {
       width: 16px;
       height: 16px;
-      color: #242424;
+      color: #fff;
     }
   }
 }
