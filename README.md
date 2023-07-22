@@ -11,3 +11,9 @@
 
  
 
+## TODO
+- 改进对 vue2 的支持
+- fix: vue2 对 less 的支持
+- fix: vue3&vue2 对 sass/scss 的支持
+- feat: 在 header 区域实现切换 CDN: `'unpkg' | 'jsdelivr' | 'jsdelivr-fastly'`
+- fix: 调整 header 右侧 icon style

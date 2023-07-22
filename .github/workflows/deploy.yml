@@ -30,5 +30,4 @@ jobs:
         with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: gh-pages
-          repositoryName: mengqiuleo/opentiny-playground
           FOLDER: dist
