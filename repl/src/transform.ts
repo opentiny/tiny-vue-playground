@@ -27,6 +27,17 @@ export async function compileFile(
   store: Store,
   { filename, code, compiled }: File
 ): Promise<(string | Error)[]> {
+  if(getVs(store.vueVersion!) === false){
+    //# add vue2 compiler
+    const compilerUrlVue2 = `https://unpkg.com/vue-template-compiler@${store.vueVersion}/browser.js`
+    const response = await fetch(compilerUrlVue2);
+    const scriptCode = await response.text();
+    eval(scriptCode);
+  }
+  //@ts-ignore
+  const res = getVs(store.vueVersion!) === false && window.VueTemplateCompiler.parseComponent(code)
+  const templateVue2 = getVs(store.vueVersion!) === false && res.template.content
+
   if (!code.trim()) {
     return []
   }
@@ -149,7 +160,8 @@ export async function compileFile(
       bindings,
       false,
       isTS,
-      hasScoped
+      hasScoped,
+      templateVue2
     )
     if (Array.isArray(clientTemplateResult)) {
       return clientTemplateResult
@@ -163,7 +175,8 @@ export async function compileFile(
       bindings,
       true,
       isTS,
-      hasScoped
+      hasScoped,
+      templateVue2
     )
     if (typeof ssrTemplateResult === 'string') {
       // ssr compile failure is fine
@@ -326,7 +339,8 @@ async function doCompileTemplate(
   bindingMetadata: BindingMetadata | undefined,
   ssr: boolean,
   isTS: boolean,
-  hasScoped: boolean
+  hasScoped: boolean,
+  templateVue2?: any
 ) {
   console.log('version是3', store.vueVersion, getVs(store.vueVersion!))
   if(getVs(store.vueVersion!)) { //vue3
@@ -364,26 +378,29 @@ async function doCompileTemplate(
 
     return code
   } else {
-    // console.log('vue2的compiler', store.compiler)
 
-    let code = descriptor.template?.content
+    // let code = descriptor.template?.content
+    let vue2Code = templateVue2
+    // console.log('con-原本的', code)
+    // console.log('con-生成的', templateVue2)
 
     if (hasScoped) {
       const node = document.createElement('div')
+      node.setAttribute('id', '#app');
       node.innerHTML = descriptor.template?.content || ''
       if (node.childElementCount !== 1) {
         store.state.errors = ['only one element on template toot allowed']
       }
       node.querySelectorAll('*').forEach(it => it.setAttribute(`data-v-${id}`, ''))
-      code = new XMLSerializer().serializeToString(node.firstElementChild!)
+      templateVue2 = new XMLSerializer().serializeToString(node.firstElementChild!)
     }
   
-    code = `\n${COMP_IDENTIFIER}.template = \`${code}\``
+    vue2Code = `\n${COMP_IDENTIFIER}.template = \`${vue2Code}\``
   
     if (isTS) {
-      code = await transformTS(code)
+      vue2Code = await transformTS(vue2Code)
     }
   
-    return code
+    return vue2Code
   }
 }

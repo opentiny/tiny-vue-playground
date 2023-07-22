@@ -90,6 +90,11 @@ export interface StoreState {
   resetFlip: boolean
 }
 
+export interface IVersions {
+  vue: string
+  opentiny?: string
+}
+
 export interface SFCOptions {
   script?: Partial<SFCScriptCompileOptions>
   style?: Partial<SFCAsyncStyleCompileOptions>
@@ -100,6 +105,7 @@ export interface Store {
   state: StoreState
   options?: SFCOptions
   compiler: typeof defaultCompiler
+  compilerVue2: any
   vueVersion?: string
   init: () => void
   setActive: (filename: string) => void
@@ -110,7 +116,7 @@ export interface Store {
   getTsConfig?: () => any
   initialShowOutput: boolean
   initialOutputMode: OutputModes
-  versions: any
+  versions: IVersions
 }
 
 export interface StoreOptions {
@@ -125,10 +131,12 @@ export interface StoreOptions {
 export class ReplStore implements Store {
   state: StoreState
   compiler = defaultCompiler
+  compilerVue2 =  ''
   vueVersion?: string
   options?: SFCOptions
   initialShowOutput: boolean
   initialOutputMode: OutputModes
+  versions: IVersions
 
   private defaultVueRuntimeURL: string
   private defaultVueServerRendererURL: string
@@ -157,6 +165,7 @@ export class ReplStore implements Store {
     this.defaultVueServerRendererURL = defaultVueServerRendererURL
     this.initialShowOutput = showOutput
     this.initialOutputMode = outputMode as OutputModes
+    this.versions = { vue: '3.2.47' }
 
     let mainFile = defaultMainFile
     if (!files[mainFile]) {
@@ -181,16 +190,19 @@ export class ReplStore implements Store {
       if(url.match(versionRegex)){
         const vs = url.match(versionRegex)![1];
         this.vueVersion = vs
+        this.versions.vue = vs
       } else {
         this.vueVersion = '3.2.47'
+        this.versions.vue = '3.2.47'
       }
     } else if(version){
       this.vueVersion = version
+      this.versions.vue = '3.2.47'
     } else {
       this.vueVersion = '3.2.47'
+      this.versions.vue = '3.2.47'
     }
   }
-versions: any;
 
   // don't start compiling until the options are set
   init() {
@@ -244,6 +256,7 @@ versions: any;
       if(url.match(versionRegex)){
         const vs = url.match(versionRegex)![1];
         this.vueVersion = vs
+        this.versions.vue = vs
       }
     }
   }
@@ -413,6 +426,8 @@ versions: any;
 
   async setVueVersion(version: string) {
     this.vueVersion = version
+    this.versions.vue = version
+
     const compilerUrl = getVs(version) === false ? `https://cdn.jsdelivr.net/npm/vue@${version}/dist/vue.esm.browser.js` : `https://cdn.jsdelivr.net/npm/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`
     // const compilerUrl = `https://unpkg.com/@vue/compiler-sfc@${this.vueVersion}/dist/compiler-sfc.esm-browser.js`
     const runtimeUrl = getVs(version) === false ? `https://unpkg.com/vue@${version}/dist/vue.esm.browser.js` : `https://unpkg.com/vue@${version}/dist/vue.esm-browser.js`

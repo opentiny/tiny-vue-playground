@@ -22,6 +22,7 @@ const initialUserOptions: UserOptions = {}
 const store = useStore({
   serializedState: location.hash.slice(1),
   userOptions: initialUserOptions,
+  versions: { vue: '3.2.47', openTiny: '3.9.1' },
 })
 
 store.init().then(() => (loading.value = false))

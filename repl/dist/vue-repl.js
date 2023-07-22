@@ -16887,6 +16887,14 @@ async function transformTS(src) {
   }).code;
 }
 async function compileFile(store, { filename, code, compiled }) {
+  if (getVs(store.vueVersion) === false) {
+    const compilerUrlVue2 = `https://unpkg.com/vue-template-compiler@${store.vueVersion}/browser.js`;
+    const response = await fetch(compilerUrlVue2);
+    const scriptCode = await response.text();
+    eval(scriptCode);
+  }
+  const res = getVs(store.vueVersion) === false && window.VueTemplateCompiler.parseComponent(code);
+  const templateVue2 = getVs(store.vueVersion) === false && res.template.content;
   if (!code.trim()) {
     return [];
   }
@@ -16982,7 +16990,8 @@ async function compileFile(store, { filename, code, compiled }) {
       bindings,
       false,
       isTS,
-      hasScoped
+      hasScoped,
+      templateVue2
     );
     if (Array.isArray(clientTemplateResult)) {
       return clientTemplateResult;
@@ -16995,7 +17004,8 @@ async function compileFile(store, { filename, code, compiled }) {
       bindings,
       true,
       isTS,
-      hasScoped
+      hasScoped,
+      templateVue2
     );
     if (typeof ssrTemplateResult === "string") {
       ssrCode += `;${ssrTemplateResult}`;
@@ -17046,80 +17056,80 @@ export default ${COMP_IDENTIFIER}`
   }
   return [];
 }
-async function doCompileScript(store, descriptor, id, ssr, isTS) {
-  if (getVs(store.vueVersion)) {
-    if (descriptor.script || descriptor.scriptSetup) {
-      const expressionPlugins = isTS ? ["typescript"] : void 0;
-      const compiledScript = store.compiler.compileScript(descriptor, {
+async function doCompileScript(store2, descriptor2, id2, ssr, isTS2) {
+  if (getVs(store2.vueVersion)) {
+    if (descriptor2.script || descriptor2.scriptSetup) {
+      const expressionPlugins = isTS2 ? ["typescript"] : void 0;
+      const compiledScript = store2.compiler.compileScript(descriptor2, {
         inlineTemplate: true,
-        ...store.options?.script,
-        id,
+        ...store2.options?.script,
+        id: id2,
         templateOptions: {
-          ...store.options?.template,
+          ...store2.options?.template,
           ssr,
-          ssrCssVars: descriptor.cssVars,
+          ssrCssVars: descriptor2.cssVars,
           compilerOptions: {
-            ...store.options?.template?.compilerOptions,
+            ...store2.options?.template?.compilerOptions,
             expressionPlugins
           }
         }
       });
-      let code = "";
+      let code2 = "";
       if (compiledScript?.bindings) {
-        code += `
+        code2 += `
 /* Analyzed bindings: ${JSON.stringify(
           compiledScript.bindings,
           null,
           2
         )} */`;
       }
-      code += `
-` + store.compiler?.rewriteDefault(
+      code2 += `
+` + store2.compiler?.rewriteDefault(
         compiledScript.content,
         COMP_IDENTIFIER,
         expressionPlugins
       );
-      if ((descriptor.script || descriptor.scriptSetup).lang === "ts") {
-        code = await transformTS(code);
+      if ((descriptor2.script || descriptor2.scriptSetup).lang === "ts") {
+        code2 = await transformTS(code2);
       }
-      return [code, compiledScript.bindings];
+      return [code2, compiledScript.bindings];
     }
-  } else if (getVs(store.vueVersion) === false) {
-    if (descriptor.script) {
-      const compiledScript = compileScript(descriptor, {
+  } else if (getVs(store2.vueVersion) === false) {
+    if (descriptor2.script) {
+      const compiledScript = compileScript(descriptor2, {
         inlineTemplate: true,
-        ...store.options?.script,
-        id,
+        ...store2.options?.script,
+        id: id2,
         templateOptions: {
-          ...store.options?.template,
-          ssrCssVars: descriptor.cssVars,
+          ...store2.options?.template,
+          ssrCssVars: descriptor2.cssVars,
           compilerOptions: {
-            ...store.options?.template?.compilerOptions,
-            expressionPlugins: isTS ? ["typescript"] : void 0
+            ...store2.options?.template?.compilerOptions,
+            expressionPlugins: isTS2 ? ["typescript"] : void 0
           }
         }
       });
-      let code = "";
+      let code2 = "";
       if (compiledScript.bindings) {
-        code += `
+        code2 += `
 /* Analyzed bindings: ${JSON.stringify(
           compiledScript.bindings,
           null,
           2
         )} */`;
       }
-      code += `
+      code2 += `
 ` + rewriteDefault(
         compiledScript.content,
         COMP_IDENTIFIER,
-        isTS ? ["typescript"] : void 0
+        isTS2 ? ["typescript"] : void 0
       );
-      if (descriptor.script.lang === "ts") {
-        code = await transformTS(code);
+      if (descriptor2.script.lang === "ts") {
+        code2 = await transformTS(code2);
       }
-      return [code, compiledScript.bindings];
-    } else if (descriptor.scriptSetup) {
-      store.state.errors = ["<script setup> is not supported"];
+      return [code2, compiledScript.bindings];
+    } else if (descriptor2.scriptSetup) {
+      store2.state.errors = ["<script setup> is not supported"];
       return [`
 const ${COMP_IDENTIFIER} = {}`, void 0];
     }
@@ -17128,56 +17138,58 @@ const ${COMP_IDENTIFIER} = {}`, void 0];
 const ${COMP_IDENTIFIER} = {}`, void 0];
   }
 }
-async function doCompileTemplate(store, descriptor, id, bindingMetadata, ssr, isTS, hasScoped) {
-  console.log("version是3", store.vueVersion, getVs(store.vueVersion));
-  if (getVs(store.vueVersion)) {
-    let { code, errors } = store.compiler.compileTemplate({
+async function doCompileTemplate(store2, descriptor2, id2, bindingMetadata, ssr, isTS2, hasScoped2, templateVue22) {
+  console.log("version是3", store2.vueVersion, getVs(store2.vueVersion));
+  if (getVs(store2.vueVersion)) {
+    let { code: code2, errors: errors2 } = store2.compiler.compileTemplate({
       isProd: false,
-      ...store.options?.template,
-      source: descriptor.template.content,
-      filename: descriptor.filename,
-      id,
-      scoped: descriptor.styles.some((s) => s.scoped),
-      slotted: descriptor.slotted,
+      ...store2.options?.template,
+      source: descriptor2.template.content,
+      filename: descriptor2.filename,
+      id: id2,
+      scoped: descriptor2.styles.some((s) => s.scoped),
+      slotted: descriptor2.slotted,
       ssr,
-      ssrCssVars: descriptor.cssVars,
+      ssrCssVars: descriptor2.cssVars,
       compilerOptions: {
-        ...store.options?.template?.compilerOptions,
+        ...store2.options?.template?.compilerOptions,
         bindingMetadata,
-        expressionPlugins: isTS ? ["typescript"] : void 0
+        expressionPlugins: isTS2 ? ["typescript"] : void 0
       }
     });
-    if (errors.length) {
-      return errors;
+    if (errors2.length) {
+      return errors2;
     }
     const fnName = ssr ? `ssrRender` : `render`;
-    code = `
-${code.replace(
+    code2 = `
+${code2.replace(
       /\nexport (function|const) (render|ssrRender)/,
       `$1 ${fnName}`
     )}
 ${COMP_IDENTIFIER}.${fnName} = ${fnName}`;
-    if ((descriptor.script || descriptor.scriptSetup)?.lang === "ts") {
-      code = await transformTS(code);
+    if ((descriptor2.script || descriptor2.scriptSetup)?.lang === "ts") {
+      code2 = await transformTS(code2);
     }
-    return code;
+    return code2;
   } else {
-    let code = descriptor.template?.content;
-    if (hasScoped) {
+    let vue2Code = templateVue22;
+    console.log("con-生成的", templateVue22);
+    if (hasScoped2) {
       const node = document.createElement("div");
-      node.innerHTML = descriptor.template?.content || "";
+      node.setAttribute("id", "#app");
+      node.innerHTML = descriptor2.template?.content || "";
       if (node.childElementCount !== 1) {
-        store.state.errors = ["only one element on template toot allowed"];
+        store2.state.errors = ["only one element on template toot allowed"];
       }
-      node.querySelectorAll("*").forEach((it) => it.setAttribute(`data-v-${id}`, ""));
-      code = new XMLSerializer().serializeToString(node.firstElementChild);
+      node.querySelectorAll("*").forEach((it) => it.setAttribute(`data-v-${id2}`, ""));
+      templateVue22 = new XMLSerializer().serializeToString(node.firstElementChild);
     }
-    code = `
-${COMP_IDENTIFIER}.template = \`${code}\``;
-    if (isTS) {
-      code = await transformTS(code);
+    vue2Code = `
+${COMP_IDENTIFIER}.template = \`${vue2Code}\``;
+    if (isTS2) {
+      vue2Code = await transformTS(vue2Code);
     }
-    return code;
+    return vue2Code;
   }
 }
 
@@ -17249,6 +17261,7 @@ class ReplStore {
     outputMode = "preview"
   } = {}) {
     this.compiler = defaultCompiler;
+    this.compilerVue2 = "";
     this.pendingCompiler = null;
     const files = {};
     if (serializedState) {
@@ -17263,6 +17276,7 @@ class ReplStore {
     this.defaultVueServerRendererURL = defaultVueServerRendererURL;
     this.initialShowOutput = showOutput;
     this.initialOutputMode = outputMode;
+    this.versions = { vue: "3.2.47" };
     let mainFile = defaultMainFile;
     if (!files[mainFile]) {
       mainFile = Object.keys(files)[0];
@@ -17284,13 +17298,17 @@ class ReplStore {
       if (url.match(versionRegex)) {
         const vs = url.match(versionRegex)[1];
         this.vueVersion = vs;
+        this.versions.vue = vs;
       } else {
         this.vueVersion = "3.2.47";
+        this.versions.vue = "3.2.47";
       }
     } else if (version) {
       this.vueVersion = version;
+      this.versions.vue = "3.2.47";
     } else {
       this.vueVersion = "3.2.47";
+      this.versions.vue = "3.2.47";
     }
   }
   // don't start compiling until the options are set
@@ -17339,6 +17357,7 @@ class ReplStore {
       if (url.match(versionRegex)) {
         const vs = url.match(versionRegex)[1];
         this.vueVersion = vs;
+        this.versions.vue = vs;
       }
     }
   }
@@ -17474,6 +17493,7 @@ class ReplStore {
   }
   async setVueVersion(version2) {
     this.vueVersion = version2;
+    this.versions.vue = version2;
     const compilerUrl = getVs(version2) === false ? `https://cdn.jsdelivr.net/npm/vue@${version2}/dist/vue.esm.browser.js` : `https://cdn.jsdelivr.net/npm/@vue/compiler-sfc@${version2}/dist/compiler-sfc.esm-browser.js`;
     const runtimeUrl = getVs(version2) === false ? `https://unpkg.com/vue@${version2}/dist/vue.esm.browser.js` : `https://unpkg.com/vue@${version2}/dist/vue.esm-browser.js`;
     const ssrUrl = "";

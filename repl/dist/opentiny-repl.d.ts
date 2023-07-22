@@ -42,6 +42,11 @@ declare class File_2 {
 }
 export { File_2 as File }
 
+declare interface IVersions {
+    vue: string;
+    opentiny?: string;
+}
+
 export declare type OutputModes = 'preview' | 'js' | 'css' | 'ssr';
 
 export declare const Preview: DefineComponent<    {
@@ -246,15 +251,16 @@ export declare interface ReplProps {
 export declare class ReplStore implements Store {
     state: StoreState;
     compiler: typeof defaultCompiler;
+    compilerVue2: string;
     vueVersion?: string;
     options?: SFCOptions;
     initialShowOutput: boolean;
     initialOutputMode: OutputModes;
+    versions: IVersions;
     private defaultVueRuntimeURL;
     private defaultVueServerRendererURL;
     private pendingCompiler;
     constructor({ serializedState, defaultVueRuntimeURL, defaultVueServerRendererURL, showOutput, outputMode }?: StoreOptions);
-    versions: any;
     init(): void;
     private initTsConfig;
     setTsConfig(config: any): void;
@@ -287,6 +293,7 @@ export declare interface Store {
     state: StoreState;
     options?: SFCOptions;
     compiler: typeof defaultCompiler;
+    compilerVue2: any;
     vueVersion?: string;
     init: () => void;
     setActive: (filename: string) => void;
@@ -297,7 +304,7 @@ export declare interface Store {
     getTsConfig?: () => any;
     initialShowOutput: boolean;
     initialOutputMode: OutputModes;
-    versions: any;
+    versions: IVersions;
 }
 
 export declare interface StoreOptions {
