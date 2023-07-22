@@ -34,8 +34,11 @@ export async function compileFile(
     const scriptCode = await response.text();
     eval(scriptCode);
   }
+
+  console.log('vue-template-compiler', getVs(store.vueVersion!))
   //@ts-ignore
   const res = getVs(store.vueVersion!) === false && window.VueTemplateCompiler.parseComponent(code)
+  console.log('vue-template-compiler-res', res)
   const templateVue2 = getVs(store.vueVersion!) === false && res.template.content
 
   if (!code.trim()) {
