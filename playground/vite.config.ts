@@ -41,8 +41,5 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: ['opentiny-repl']
-  },
-  build: {
-    outDir: path.resolve(__dirname, 'dist') // 设置打包输出的目录，这里设置为 dist 目录
   }
 })
