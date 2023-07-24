@@ -1,6 +1,6 @@
 import { gte } from 'semver'
 import { type Ref, computed, unref } from 'vue'
-import { type MaybeRef, useFetch, useLocalStorage } from '@vueuse/core'
+import { useFetch, useLocalStorage } from '@vueuse/core'
 import { type Versions } from '@/composables/store'
 import { type ImportMap } from '@/utils/import-map'
 
@@ -11,7 +11,7 @@ export interface Dependency {
 }
 
 export type Cdn = 'unpkg' | 'jsdelivr' | 'jsdelivr-fastly'
-export const cdn = useLocalStorage<Cdn>('setting-cdn', 'jsdelivr-fastly')
+export const cdn = useLocalStorage('setting-cdn', 'jsdelivr-fastly')
 
 export function genCdnLink(pkg: string, version: string | undefined, path: string) {
   version = version ? `@${version}` : ''
@@ -86,17 +86,17 @@ export function genImportMap({ vue, openTiny }: Partial<Versions> = {}): ImportM
     )
   }
 
-  return map
+  return map as ImportMap
 }
 
-export function getVersions(pkg: MaybeRef<string>) {
+export function getVersions(pkg: any) {
   const url = computed(() => `https://data.jsdelivr.com/v1/package/npm/${unref(pkg)}`)
   return useFetch(url, {
     initialData: [],
     // eslint-disable-next-line no-sequences
     afterFetch: (ctx) => ((ctx.data = ctx.data.versions), ctx),
     refetch: true
-  }).json<string[]>().data as Ref<string[]>
+  }).json().data as Ref<string[]>
 }
 
 function isStableVersion(version) {

@@ -52,8 +52,8 @@ async function copyLink() {
   await navigator.clipboard.writeText(location.href)
   Notify({
     type: 'success',
-    title: 'Share',
-    message: 'Sharable URL has been copied to clipboard.',
+    title: '分享',
+    message: '当前URL已被复制到剪贴板.',
     duration: 2000,
   })
 }

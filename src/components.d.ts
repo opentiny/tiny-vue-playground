@@ -8,6 +8,5 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Header: typeof import('./components/Header.vue')['default']
-    Settings: typeof import('./components/Settings.vue')['default']
   }
 }

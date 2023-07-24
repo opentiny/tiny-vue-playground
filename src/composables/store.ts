@@ -222,16 +222,18 @@ export function useStore(initial: Initial) {
       return
     }
 
-    await Modal.confirm(`您确定要删除 ${filename.replace(/^src\//, '')}?`).then(() => {
-      Notify({
-        type: 'success',
-        title: `删除 ${filename.replace(/^src\//, '')}`,
-        message: '删除成功',
-        duration: 2000
-      })
-      if (state.activeFile.filename === filename) setActive(APP_FILE)
+    await Modal.confirm(`您确定要删除 ${filename.replace(/^src\//, '')}?`).then((res) => {
+      if (res === 'confirm') {
+        Notify({
+          type: 'success',
+          title: `删除 ${filename.replace(/^src\//, '')}`,
+          message: '删除成功',
+          duration: 2000
+        })
+        if (state.activeFile.filename === filename) setActive(APP_FILE)
 
-      delete state.files[filename]
+        delete state.files[filename]
+      }
     })
   }
 
