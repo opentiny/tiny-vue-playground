@@ -28,7 +28,7 @@ jobs:
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.DEPLOY }}
           BRANCH: gh-pages
           repositoryName: opentiny/tiny-vue-playground
           FOLDER: dist
