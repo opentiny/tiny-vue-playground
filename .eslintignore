@@ -1,4 +1,4 @@
 node_modules/*
-repl/*
 dist/*
 docs/*
+src/template/*
