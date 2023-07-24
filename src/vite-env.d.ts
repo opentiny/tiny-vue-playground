@@ -12,4 +12,6 @@ declare module '@vueuse/core'
 
 declare module 'sucrase'
 
+declare module '@opentiny/vue-icon'
+
 declare module '@vue/repl/monaco-editor'

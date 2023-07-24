@@ -1,23 +1,29 @@
-<script lang="jsx">
+<script lang="tsx">
 // 引入 @opentiny/vue 组件
 import { Button, Link } from '@opentiny/vue'
 
 export default {
   components: {
     TinyButton: Button,
-    TinyLink: Link,
+    TinyLink: Link
   },
+  data() {
+    return {
+      msg: 'hello world!'
+    }
+  }
 }
 </script>
 
 <template>
   <TinyButton>确定</TinyButton>
+  <h1>{{ msg }}</h1>
   <div class="tinyvue">
     <div class="tinyvue-page">
       tinyvue
-      <TinyLink type="success" href="https://github.com/opentiny/tiny-vue">
+      <tiny-link type="success" href='https://github.com/opentiny/tiny-vue'>
         tinyvue
-      </TinyLink>
+      </tiny-link>
     </div>
   </div>
 </template>

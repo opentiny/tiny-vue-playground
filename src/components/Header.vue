@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { type ComputedRef, reactive } from 'vue'
+import { type ComputedRef, reactive, ref } from 'vue'
 import { Notify, Option as TinyOption, Select as TinySelect } from '@opentiny/vue'
 import { useDark, useToggle } from '@vueuse/core'
 import Share from '../icons/Share.vue'
 import GitHub from '../icons/Github.vue'
 import Sun from '../icons/Sun.vue'
 import Moon from '../icons/Moon.vue'
+import { cdn, getSupportedOpVersions, getSupportedVueVersions } from '@/utils/dependency'
 import { type ReplStore, type VersionKey } from '@/composables/store'
-import { getSupportedOpVersions, getSupportedVueVersions } from '@/utils/dependency'
 
 const { store } = defineProps<{
   store: ReplStore
@@ -34,6 +34,13 @@ const versions = reactive<Record<VersionKey, Version>>({
     active: store.versions.vue,
   },
 })
+
+const cdns = reactive([
+  { value: 'unpkg', label: 'unpkg' },
+  { value: 'jsdelivr', label: 'jsdelivr' },
+  { value: 'jsdelivr-fastly', label: 'jsdelivr-fastly' },
+])
+const cdnValue = ref(cdn)
 
 async function setVersion(v: any, key: VersionKey) {
   versions[key].active = 'loading...'
@@ -70,22 +77,36 @@ async function copyLink() {
           <TinyOption v-for="ver in v.published" :key="ver" :label="ver" :value="ver" />
         </TinySelect>
       </div>
+      <div>
+        <span whitespace-nowrap>cdn: </span>
+        <TinySelect v-model="cdnValue" placeholder="请选择">
+          <TinyOption v-for="cdn in cdns" :key="cdn.value" :label="cdn.label" :value="cdn.value" />
+        </TinySelect>
+      </div>
 
-      <div flex="~ gap-4">
-        <Share @click="copyLink" />
-        <div title="Toggle dark mode" class="toggle-dark" @click="toggleDark()">
+      <div flex="~ gap-4" items-center>
+        <div flex-1>
+          <Share @click="copyLink" />
+        </div>
+        <div flex-1 title="Toggle dark mode" class="toggle-dark" @click="toggleDark()">
           <Sun class="light" />
           <Moon class="dark" />
         </div>
-        <a href="https://github.com/opentiny/tiny-vue-playground/tree/main" target="_blank">
-          <GitHub style="width: 1.7em; height: 1.7em" />
-        </a>
+        <div flex-1>
+          <a href="https://github.com/opentiny/tiny-vue-playground/tree/main" target="_blank">
+            <GitHub />
+          </a>
+        </div>
       </div>
     </div>
   </nav>
 </template>
 
 <style lang="scss">
+.tiny-select {
+  width: 120px;
+}
+
 nav {
   --bg: #fff;
   --bg-light: #fff;
