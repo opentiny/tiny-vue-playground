@@ -30,5 +30,4 @@ jobs:
         with:
           ACCESS_TOKEN: ${{ secrets.DEPLOY }}
           BRANCH: gh-pages
-          repositoryName: opentiny/tiny-vue-playground
-          FOLDER: src/dist
+          FOLDER: dist
