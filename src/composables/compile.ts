@@ -18,6 +18,7 @@ import type { File, Store } from '@vue/repl'
 
 // import { transform } from 'sucrase'
 import { transform } from './babel'
+import { extractVueImport } from './mergeVueImport'
 
 type IStore = typeof Store
 type IFile = typeof File
@@ -40,6 +41,33 @@ async function transformTS(src: string) {
     presets: ['react', 'typescript'],
     plugins: ['@vue/babel-plugin-jsx']
   }).code
+}
+
+function mergeVueImports(imports1, imports2) {
+  // 通过正则表达式提取每个 import 语句中的花括号内的内容
+  const importPattern = /{([\s\S]*?)}/
+
+  // 提取 imports1 的花括号内的内容
+  const matches1 = imports1.match(importPattern)
+  const content1 = matches1 ? matches1[1].trim() : ''
+
+  // 提取 imports2 的花括号内的内容
+  const matches2 = imports2.match(importPattern)
+  const content2 = matches2 ? matches2[1].trim() : ''
+
+  const mergedContent = Array.from(
+    new Set(
+      content1
+        .split(',')
+        .map((item) => item.trim())
+        .concat(content2.split(',').map((item) => item.trim()))
+    )
+  ).join(', ')
+
+  // 创建新的 import 语句
+  const mergedImport = `import { ${mergedContent} } from 'vue';`
+
+  return mergedImport
 }
 
 export async function compileFile(store: IStore, { filename, code, compiled }: IFile): Promise<(string | Error)[]> {
@@ -146,7 +174,11 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
     return [e.stack.split('\n').slice(0, 12).join('\n')]
   }
 
-  clientCode += clientScript
+  const { cleanedCode: cleanedCodeJSX, imports: importsJSX } = extractVueImport(clientScript.trim()) // 将 jsx 语法生成的 import 导入去掉
+  const init = 'import { openBlock as _openBlock, createBlock as _createBlock } from "vue"' // this code fix init bug(don't delete)
+  if (importsJSX === '' || importsJSX === init) clientCode += clientScript
+  else clientCode += cleanedCodeJSX
+  // clientCode += clientScript
 
   // script ssr needs to be performed if :
   // 1.using <script setup> where the render fn is inlined.
@@ -178,7 +210,14 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
     )
     if (Array.isArray(clientTemplateResult)) return clientTemplateResult
 
-    clientCode += `;${clientTemplateResult}`
+    // clientCode += `;${clientTemplateResult}`
+    const { cleanedCode: cleanedCodeVUE, imports: importsVUE } = extractVueImport(clientTemplateResult.trim())
+    if (importsJSX === '') {
+      clientCode += `${clientTemplateResult}`
+    } else {
+      const mergedImport = mergeVueImports(importsJSX.trim(), importsVUE.trim())
+      clientCode += `;${mergedImport}${cleanedCodeVUE}`
+    }
 
     const ssrTemplateResult = await doCompileTemplate(
       store,
