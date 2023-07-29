@@ -64,5 +64,10 @@
     "vite-plugin-inspect": "^0.7.29",
     "vue": "^3.2.47",
     "vue-tsc": "^1.4.2"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@vue/repl@2.5.5": "patches/@vue__repl@2.5.5.patch"
+    }
   }
 }

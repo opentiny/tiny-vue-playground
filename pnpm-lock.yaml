@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@vue/repl@2.5.5':
+    hash: euy3p7itf6qkihs6775gwrwirm
+    path: patches/@vue__repl@2.5.5.patch
+
 importers:
 
   .:
@@ -16,7 +21,7 @@ importers:
         version: 3.9.1
       '@vue/repl':
         specifier: ^2.5.5
-        version: 2.5.5
+        version: 2.5.5(patch_hash=euy3p7itf6qkihs6775gwrwirm)
       '@vueuse/core':
         specifier: ^10.2.0
         version: 10.2.1(vue@3.3.4)
@@ -4120,10 +4125,11 @@ packages:
     dependencies:
       '@vue/shared': 3.3.4
 
-  /@vue/repl@2.5.5:
+  /@vue/repl@2.5.5(patch_hash=euy3p7itf6qkihs6775gwrwirm):
     resolution: {integrity: sha512-wzhUz4kqVHarN1oykypFP8e81VLJMRd0Gtkwa945XbAI1mIGTVVyxgs93H6f73NHsHTD+S144UYLUPVCnlqjeQ==}
     requiresBuild: true
     dev: false
+    patched: true
 
   /@vue/runtime-core@3.2.47:
     resolution: {integrity: sha512-RZxbLQIRB/K0ev0K9FXhNbBzT32H9iRtYbaXb0ZIz2usLms/D55dJR2t6cIEUn6vyhS3ALNvNthI+Q95C+NOpA==}

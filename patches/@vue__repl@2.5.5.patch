@@ -1,0 +1,68 @@
+diff --git a/dist/vue-repl.js b/dist/vue-repl.js
+index 5c8e522920ae4e57e24bb3257cdc8afb0c73b896..32dc6cd9cd4155aeb78ccb12fe2aea0fb9c26670 100644
+--- a/dist/vue-repl.js
++++ b/dist/vue-repl.js
+@@ -4,6 +4,10 @@ import { MagicString, babelParse, extractIdentifiers, walkIdentifiers, isStaticP
+ import { c as commonjsGlobal, g as getDefaultExportFromCjs } from './chunks/_commonjsHelpers-24198af3.js';
+ import { a as atou, u as utoa, d as debounce } from './chunks/utils-a5e1dbae.js';
+ 
++function getVs(version){
++  return Number(version.split('.')[0]) === 3 ? true : false
++}
++
+ const _hoisted_1$5 = ["onMousedown"];
+ const _sfc_main$7 = /* @__PURE__ */ defineComponent({
+   __name: "SplitPane",
+@@ -642,16 +646,24 @@ Tip: edit the "Import Map" tab to specify import paths for dependencies.`;
+         console.log(
+           `[@vue/repl] successfully compiled ${modules.length} module${modules.length > 1 ? `s` : ``}.`
+         );
+-        const codeToEval = [
++        const codeToEval = getVs(store.versions.vue) ? [
+           `window.__modules__ = {};window.__css__ = [];if (window.__app__) window.__app__.unmount();` + (isSSR ? `` : `document.body.innerHTML = '<div id="app"></div>' + \`${previewOptions?.bodyHTML || ""}\``),
+           ...modules,
+           `setTimeout(()=> {
+         document.querySelectorAll('style[css]').forEach(el => el.remove())
+         document.head.insertAdjacentHTML('beforeend', window.__css__.map(s => \`<style css>\${s}</style>\`).join('\\n'))
+       }, 1)`
+-        ];
++        ] : [`window.__modules__ = {};window.__css__ = [];` +
++        `if (window.__app__) window.__app__.$destroy();` +
++        `document.body.innerHTML = '<div id="app"></div>'`,
++        ...modules,
++        // `document.getElementById('__sfc-styles').innerHTML = window.__css__`
++        `setTimeout(()=> {
++          document.querySelectorAll('style[css]').forEach(el => el.remove())
++          document.head.insertAdjacentHTML('beforeend', window.__css__.map(s => \`<style css>\${s}</style>\`).join('\\n'))
++        }, 1)`];
+         if (mainFile.endsWith(".vue")) {
+-          codeToEval.push(
++          getVs(store.versions.vue) ? codeToEval.push(
+             `import { ${isSSR ? `createSSRApp` : `createApp`} as _createApp } from "vue"
+         ${previewOptions?.customCode?.importCode || ""}
+         const _mount = () => {
+@@ -670,7 +682,23 @@ Tip: edit the "Import Map" tab to specify import paths for dependencies.`;
+         } else {
+           _mount()
+         }`
+-          );
++          ) :
++          codeToEval.push( `import Vue from "vue"
++          const _mount = () => {
++            const AppComponent = __modules__["${mainFile}"].default
++            AppComponent.name = 'Repl'
++            AppComponent.el = "#app"
++            const app = window.__app__ = new Vue(AppComponent)
++            Vue.config.errorHandler = console.error
++            // app.config.unwrapInjectedRef = true
++            // app.config.errorHandler = e => console.error(e)
++            // app.mount('#app')
++          }
++          if (window.__ssr_promise__) {
++            window.__ssr_promise__.then(_mount)
++          } else {
++            _mount()
++          }`);
+         }
+         await proxy.eval(codeToEval);
+       } catch (e) {
