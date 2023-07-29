@@ -18,23 +18,24 @@ export function extractVueImport(sourceCode) {
   }
 }
 // eg
-const sourceCode = `
-import { resolveComponent as _resolveComponent, createVNode as _createVNode, withCtx as _withCtx, openBlock as _openBlock, createBlock as _createBlock } from "vue";
-// 引入 @opentiny/vue 组件
-import { Button, Link } from '@opentiny/vue';
-function render(_ctx, _cache, \$props, \$setup, \$data, \$options) {
-  // ...
-}
-sfc.render = render;
-`
+// const sourceCode = `
+// import { resolveComponent as _resolveComponent, createVNode as _createVNode, withCtx as _withCtx, openBlock as _openBlock, createBlock as _createBlock } from "vue";
+// // 引入 @opentiny/vue 组件
+// import { Button, Link } from '@opentiny/vue';
+// function render(_ctx, _cache, \$props, \$setup, \$data, \$options) {
+//   // ...
+// }
+// sfc.render = render;
+// `
 
-const { cleanedCode, imports } = extractVueImport(sourceCode)
+// const { cleanedCode, imports } = extractVueImport(sourceCode)
 
-console.log('Cleaned code:')
-console.log(cleanedCode)
+// console.log('Cleaned code:')
+// console.log(cleanedCode)
 
-console.log('\nExtracted imports:')
-console.log(imports)
+// console.log('\nExtracted imports:')
+// console.log(imports)
+
 // 合并 vue 和 jsx 的 import语句
 export function mergeVueImports(imports1, imports2) {
   // 通过正则表达式提取每个 import 语句中的花括号内的内容
@@ -69,11 +70,11 @@ export function mergeVueImports(imports1, imports2) {
   return mergedImport
 }
 // eg
-const imports1 = 'import { createVNode as _createVNode } from "vue";'
-const imports2 =
-  'import { resolveComponent as _resolveComponent, createVNode as _createVNode, withCtx as _withCtx, openBlock as _openBlock, createBlock as _createBlock } from "vue";'
+// const imports1 = 'import { createVNode as _createVNode } from "vue";'
+// const imports2 =
+//   'import { resolveComponent as _resolveComponent, createVNode as _createVNode, withCtx as _withCtx, openBlock as _openBlock, createBlock as _createBlock } from "vue";'
 
-const mergedImport = mergeVueImports(imports1, imports2)
+// const mergedImport = mergeVueImports(imports1, imports2)
 
-console.log('Merged import:')
-console.log(mergedImport)
+// console.log('Merged import:')
+// console.log(mergedImport)

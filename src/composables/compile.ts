@@ -11,9 +11,6 @@ import {
 import hashId from 'hash-sum'
 import less from 'less'
 
-// import sass from 'sass'
-// import { compile } from 'sass'
-// import { getVs } from './utils'
 import type { File, Store } from '@vue/repl'
 
 // import { transform } from 'sucrase'
@@ -131,8 +128,6 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
   const isTS = testTs(scriptLang)
   if (scriptLang && !isTS) return ['Only lang="ts" is supported for <script> blocks.']
 
-  console.log('isTs', scriptLang)
-
   const hasScoped = descriptor.styles.some((s) => s.scoped)
   let clientCode = ''
   let ssrCode = ''
@@ -228,7 +223,6 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
     }
 
     // const styleResult = await store.compiler.compileStyleAsync({
-    //* vue2 和 vue3 统一使用vue3的css编译器，得到的结果一致
     const styleResult = await compileStyleAsync({
       ...store.options?.style,
       source: contentStyle,
@@ -337,8 +331,7 @@ async function doCompileTemplate(
   isTS: boolean,
   hasScoped: boolean
 ) {
-  console.log('store', store)
-  console.log('version是3', store.vueVersion, getVs(store.vueVersion!))
+  // console.log('version', store.vueVersion)
   if (getVs(store.vueVersion!)) {
     // vue3
     let { code, errors } = store.compiler.compileTemplate({

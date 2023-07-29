@@ -1,8 +1,15 @@
-<script setup>
+<script>
 import App from './App.vue'
 import { setupOpenTiny } from './opentiny.js'
 
-setupOpenTiny()
+export default {
+  mounted() {
+    setupOpenTiny()
+  },
+  components: {
+    App
+  }
+}
 </script>
 
 <template>

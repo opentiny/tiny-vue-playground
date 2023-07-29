@@ -73,8 +73,6 @@ export function useStore(initial: Initial) {
   const importMap = computed<ImportMap>(() => mergeImportMap(bultinImportMap.value, userImportMap.value))
   const vueVersion = computed<string>(() => versions.vue)
 
-  console.log('Files:', state.files, 'Options:', userOptions)
-
   const store: StoreInstance = reactive({
     init,
     state,

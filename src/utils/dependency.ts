@@ -120,7 +120,7 @@ export function getSupportedVueVersions() {
         return isStableVersion(version) && gte(version, '2.6.0')
       } else if (version.startsWith('3.')) {
         // 对于 Vue 3，只保留版本号高于等于 3.2.0 的稳定版本
-        return isStableVersion(version) && gte(version, '3.2.0')
+        return isStableVersion(version) && gte(version, '3.2.22')
       } else {
         // 其他版本不符合条件，过滤掉
         return false
