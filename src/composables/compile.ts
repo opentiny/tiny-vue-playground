@@ -71,23 +71,6 @@ function mergeVueImports(imports1, imports2) {
 }
 
 export async function compileFile(store: IStore, { filename, code, compiled }: IFile): Promise<(string | Error)[]> {
-  if (getVs(store.vueVersion!) === false) {
-    // # add vue2 compiler
-    const compilerUrlVue2 = `https://unpkg.com/vue-template-compiler@${store.vueVersion}/browser.js`
-    const response = await fetch(compilerUrlVue2)
-    const scriptCode = await response.text()
-    // eslint-disable-next-line no-eval
-    eval(scriptCode)
-  }
-
-  // TODO: template已实现支持vue2，doCompileScript未实现
-  console.log('vue-template-compiler', getVs(store.vueVersion!))
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  const res = getVs(store.vueVersion!) === false && window.VueTemplateCompiler.parseComponent(code)
-  console.log('vue-template-compiler-res', res)
-  const templateVue2 = getVs(store.vueVersion!) === false && res.template.content
-
   if (!code.trim()) return []
 
   if (filename.endsWith('.css')) {
@@ -102,15 +85,6 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
     store.state.errors = []
     return []
   }
-  // 加入 sass/scss文件判断
-  // if (filename.endsWith('.sass') || filename.endsWith('.scss')) {
-  //   // const outStyle = renderSync({ data: code });
-  //   const outStyle = compile(code)
-  //   console.log('constyle', outStyle)
-  //   compiled.css = outStyle.css
-  //   store.state.errors = []
-  //   return []
-  // }
 
   if (filename.endsWith('.js') || filename.endsWith('.ts')) {
     if (shouldTransformRef(code)) code = transformRef(code, { filename }).code
@@ -157,6 +131,8 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
   const isTS = testTs(scriptLang)
   if (scriptLang && !isTS) return ['Only lang="ts" is supported for <script> blocks.']
 
+  console.log('isTs', scriptLang)
+
   const hasScoped = descriptor.styles.some((s) => s.scoped)
   let clientCode = ''
   let ssrCode = ''
@@ -174,10 +150,16 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
     return [e.stack.split('\n').slice(0, 12).join('\n')]
   }
 
-  const { cleanedCode: cleanedCodeJSX, imports: importsJSX } = extractVueImport(clientScript.trim()) // 将 jsx 语法生成的 import 导入去掉
-  const init = 'import { openBlock as _openBlock, createBlock as _createBlock } from "vue"' // this code fix init bug(don't delete)
-  if (importsJSX === '' || importsJSX === init) clientCode += clientScript
-  else clientCode += cleanedCodeJSX
+  let importsJSX
+  if (scriptLang !== 'tsx') {
+    clientCode += clientScript
+  } else {
+    const { cleanedCode: cleanedCodeJSX, imports } = extractVueImport(clientScript.trim()) // 将 jsx 语法生成的 import 导入去掉
+    importsJSX = imports
+    const init = 'import { openBlock as _openBlock, createBlock as _createBlock } from "vue"' // this code fix init bug(don't delete)
+    if (importsJSX === '' || importsJSX === init) clientCode += clientScript
+    else clientCode += cleanedCodeJSX
+  }
   // clientCode += clientScript
 
   // script ssr needs to be performed if :
@@ -198,37 +180,23 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
   // template
   // only need dedicated compilation if not using <script setup>
   if (descriptor.template && (!descriptor.scriptSetup || store.options?.script?.inlineTemplate === false)) {
-    const clientTemplateResult = await doCompileTemplate(
-      store,
-      descriptor,
-      id,
-      bindings,
-      false,
-      isTS,
-      hasScoped,
-      templateVue2
-    )
+    const clientTemplateResult = await doCompileTemplate(store, descriptor, id, bindings, false, isTS, hasScoped)
     if (Array.isArray(clientTemplateResult)) return clientTemplateResult
 
     // clientCode += `;${clientTemplateResult}`
-    const { cleanedCode: cleanedCodeVUE, imports: importsVUE } = extractVueImport(clientTemplateResult.trim())
-    if (importsJSX === '') {
-      clientCode += `${clientTemplateResult}`
+    if (scriptLang !== 'tsx') {
+      clientCode += `;${clientTemplateResult}`
     } else {
-      const mergedImport = mergeVueImports(importsJSX.trim(), importsVUE.trim())
-      clientCode += `;${mergedImport}${cleanedCodeVUE}`
+      const { cleanedCode: cleanedCodeVUE, imports: importsVUE } = extractVueImport(clientTemplateResult.trim())
+      if (importsJSX === '') {
+        clientCode += `${clientTemplateResult}`
+      } else {
+        const mergedImport = mergeVueImports(importsJSX.trim(), importsVUE.trim())
+        clientCode += `;${mergedImport}${cleanedCodeVUE}`
+      }
     }
 
-    const ssrTemplateResult = await doCompileTemplate(
-      store,
-      descriptor,
-      id,
-      bindings,
-      true,
-      isTS,
-      hasScoped,
-      templateVue2
-    )
+    const ssrTemplateResult = await doCompileTemplate(store, descriptor, id, bindings, true, isTS, hasScoped)
     if (typeof ssrTemplateResult === 'string') {
       // ssr compile failure is fine
       ssrCode += `;${ssrTemplateResult}`
@@ -258,12 +226,6 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
       const outStyle = await less.render(contentStyle)
       contentStyle = outStyle.css
     }
-    // else if (style.lang === 'sass' || style.lang === 'scss') {
-    //   // const outStyle = renderSync({ data: code });
-    //   const outStyle = compile(code)
-    //   console.log('constyle', outStyle)
-    //   contentStyle = outStyle.css
-    // }
 
     // const styleResult = await store.compiler.compileStyleAsync({
     //* vue2 和 vue3 统一使用vue3的css编译器，得到的结果一致
@@ -373,8 +335,7 @@ async function doCompileTemplate(
   bindingMetadata: BindingMetadata | undefined,
   ssr: boolean,
   isTS: boolean,
-  hasScoped: boolean,
-  templateVue2?: any
+  hasScoped: boolean
 ) {
   console.log('store', store)
   console.log('version是3', store.vueVersion, getVs(store.vueVersion!))
@@ -411,10 +372,7 @@ async function doCompileTemplate(
 
     return code
   } else {
-    // let code = descriptor.template?.content
-    let vue2Code = templateVue2
-    // console.log('con-原本的', code)
-    // console.log('con-生成的', templateVue2)
+    let code = descriptor.template?.content
 
     if (hasScoped) {
       const node = document.createElement('div')
@@ -423,13 +381,13 @@ async function doCompileTemplate(
       if (node.childElementCount !== 1) store.state.errors = ['only one element on template toot allowed']
 
       node.querySelectorAll('*').forEach((it) => it.setAttribute(`data-v-${id}`, ''))
-      templateVue2 = new XMLSerializer().serializeToString(node.firstElementChild!)
+      code = new XMLSerializer().serializeToString(node.firstElementChild!)
     }
 
-    vue2Code = `\n${COMP_IDENTIFIER}.template = \`${vue2Code}\``
+    code = `\n${COMP_IDENTIFIER}.template = \`${code}\``
 
-    if (isTS) vue2Code = await transformTS(vue2Code)
+    if (isTS) code = await transformTS(code)
 
-    return vue2Code
+    return code
   }
 }
