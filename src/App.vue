@@ -3,8 +3,8 @@ import { Repl, type SFCOptions } from '@vue/repl'
 import Monaco from '@vue/repl/monaco-editor'
 import { ref, watchEffect } from 'vue'
 import { useDark } from '@vueuse/core'
-
 import { Loading } from '@opentiny/vue'
+import LocalStorageService from './utils/localStorage'
 import { useStore } from './composables/store'
 import { type UserOptions } from '@/composables/store'
 
@@ -26,6 +26,7 @@ const store = useStore({
   userOptions: initialUserOptions,
   versions: { vue: '3.2.47', openTiny: '3.9.1' },
 })
+LocalStorageService.setItem('versions', store.versions)
 
 store.init().then(() => (loading.value = false))
 

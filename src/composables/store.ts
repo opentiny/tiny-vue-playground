@@ -6,10 +6,11 @@ import mainCode from '../template/main.vue?raw'
 import welcomeCode from '../template/welcome.vue?raw'
 import openTinyCode from '../template/opentiny.js?raw'
 import tsconfigCode from '../template/tsconfig.json?raw'
-import { compileFile } from './compile'
+import { compileFile, getVs } from './compile'
 import { atou, utoa } from '@/utils/encode'
 import { genImportMap, genVueLink } from '@/utils/dependency'
 import { type ImportMap, mergeImportMap } from '@/utils/import-map'
+import LocalStorageService from '@/utils/localStorage'
 
 type StoreInstance = typeof Store
 type StoreStateInstance = typeof StoreState
@@ -35,8 +36,11 @@ const LEGACY_IMPORT_MAP = 'src/import_map.json'
 export const IMPORT_MAP = 'import-map.json'
 export const TSCONFIG = 'tsconfig.json'
 
+const refresh = ref(false)
+
 export function useStore(initial: Initial) {
-  const versions = reactive(initial.versions || { vue: '3.2.47', openTiny: '3.9.1' })
+  const vs = LocalStorageService.getItem('versions')
+  const versions = reactive(vs || initial.versions)
 
   const compiler = shallowRef<typeof import('vue/compiler-sfc')>()
   const [nightly, toggleNightly] = useToggle(false)
@@ -107,10 +111,16 @@ export function useStore(initial: Initial) {
     const { compilerSfc, runtimeDom } = genVueLink(version)
 
     compiler.value = await import(/* @vite-ignore */ compilerSfc)
+    if (getVs(versions.vue) && !getVs(version)) refresh.value = true
     state.vueRuntimeURL = runtimeDom
     versions.vue = version
+    LocalStorageService.setItem('versions', {
+      openTiny: versions.openTiny,
+      vue: version
+    })
 
     console.info(`[opentiny-playground] Now using Vue version: ${version}`)
+    if (refresh.value) location.reload()
   }
 
   async function init() {
@@ -260,6 +270,10 @@ export function useStore(initial: Initial) {
 
   function setOpenTinyVersion(version: string) {
     versions.openTiny = version
+    LocalStorageService.setItem('versions', {
+      openTiny: version,
+      vue: versions.vue
+    })
   }
 
   return {
