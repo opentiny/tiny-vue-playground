@@ -28,7 +28,17 @@ const store = useStore({
 })
 LocalStorageService.setItem('versions', store.versions)
 
-store.init().then(() => (loading.value = false))
+let loadingInstance
+// eslint-disable-next-line prefer-const
+loadingInstance = Loading.service({
+  text: '加载中...',
+  target: document.getElementById('loading'),
+})
+
+store.init().then(() => {
+  loading.value = false
+  loadingInstance.close()
+})
 
 function handleKeydown(evt: KeyboardEvent) {
   if ((evt.ctrlKey || evt.metaKey) && evt.code === 'KeyS')
@@ -39,17 +49,6 @@ const dark = useDark()
 
 // persist state
 watchEffect(() => history.replaceState({}, '', `#${store.serialize()}`))
-
-let loadingInstance
-// eslint-disable-next-line prefer-const
-loadingInstance = Loading.service({
-  text: '加载中...',
-  target: document.getElementById('loading'),
-})
-
-window.addEventListener('load', () => {
-  loadingInstance.close()
-})
 </script>
 
 <template>
