@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { type ComputedRef, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
+import type { Ref } from 'vue'
+
 import { Notify, Option as TinyOption, Select as TinySelect } from '@opentiny/vue'
 import { useDark, useToggle } from '@vueuse/core'
 import Share from '../icons/Share.vue'
 import GitHub from '../icons/Github.vue'
 import Sun from '../icons/Sun.vue'
 import Moon from '../icons/Moon.vue'
-import { cdn, getSupportedOpVersions, getSupportedVueVersions } from '@/utils/dependency'
+import { cdn, getSupportedOpVersions, getSupportedTSVersions, getSupportedVueVersions } from '@/utils/dependency'
 import { type ReplStore, type VersionKey } from '@/composables/store'
 
 const { store } = defineProps<{
@@ -18,7 +20,7 @@ const toggleDark = useToggle(dark)
 
 interface Version {
   text: string
-  published: ComputedRef<string[]>
+  published: Ref<string[]>
   active: string
 }
 
@@ -32,6 +34,11 @@ const versions = reactive<Record<VersionKey, Version>>({
     text: 'Vue',
     published: getSupportedVueVersions(),
     active: store.versions.vue,
+  },
+  typescript: {
+    text: 'TypeScript',
+    published: getSupportedTSVersions(),
+    active: store.versions.typescript,
   },
 })
 
@@ -72,7 +79,7 @@ async function copyLink() {
 
     <div flex="~ gap-2" items-center>
       <div v-for="(v, key) of versions" :key="key" flex="~ gap-2" items-center lt-lg-hidden>
-        <span whitespace-nowrap>{{ `${v.text} Version:` }}</span>
+        <span whitespace-nowrap>{{ `${v.text}:` }}</span>
         <TinySelect v-model="v.active" placeholder="请选择" @change="setVersion(v.active, key)">
           <TinyOption v-for="ver in v.published" :key="ver" :label="ver" :value="ver" />
         </TinySelect>

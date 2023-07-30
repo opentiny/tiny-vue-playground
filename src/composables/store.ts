@@ -1,6 +1,7 @@
-import { File, type Store, type StoreState } from '@vue/repl'
+import { File } from '@vue/repl'
+import { type Store, type StoreState } from '@vue/repl'
 import { computed, reactive, ref, shallowRef, watch, watchEffect } from 'vue'
-import { useToggle } from '@vueuse/core'
+import { useDebounceFn, useToggle } from '@vueuse/core'
 import { Modal, Notify } from '@opentiny/vue'
 import mainCode from '../template/main.vue?raw'
 import welcomeCode from '../template/welcome.vue?raw'
@@ -19,7 +20,7 @@ export interface Initial {
   versions?: Versions
   userOptions?: UserOptions
 }
-export type VersionKey = 'vue' | 'openTiny'
+export type VersionKey = 'vue' | 'openTiny' | 'typescript'
 export type Versions = Record<VersionKey, string>
 export interface UserOptions {
   styleSource?: string
@@ -52,14 +53,16 @@ export function useStore(initial: Initial) {
   let activeFile = _files[APP_FILE]
   if (!activeFile) activeFile = Object.values(_files)[0]
 
-  const state = reactive<StoreStateInstance>({
+  const state: StoreStateInstance = reactive({
     mainFile: MAIN_FILE,
     files: _files,
     activeFile,
     errors: [],
     vueRuntimeURL: '',
     vueServerRendererURL: '',
-    resetFlip: false
+    resetFlip: false,
+    typescriptLocale: undefined,
+    typescriptVersion: computed(() => versions.typescript)
   })
 
   const bultinImportMap = computed<ImportMap>(() => genImportMap(versions))
@@ -77,7 +80,7 @@ export function useStore(initial: Initial) {
   const importMap = computed<ImportMap>(() => mergeImportMap(bultinImportMap.value, userImportMap.value))
   const vueVersion = computed<string>(() => versions.vue)
 
-  const store: StoreInstance = reactive({
+  const store = reactive<StoreInstance>({
     init,
     state,
     compiler: compiler as any,
@@ -89,7 +92,8 @@ export function useStore(initial: Initial) {
     initialOutputMode: 'preview',
     renameFile,
     getTsConfig,
-    vueVersion
+    vueVersion,
+    reloadLanguageTools: undefined
   })
 
   watch(
@@ -116,20 +120,28 @@ export function useStore(initial: Initial) {
     versions.vue = version
     LocalStorageService.setItem('versions', {
       openTiny: versions.openTiny,
-      vue: version
+      vue: version,
+      typescript: versions.typescript
     })
 
     console.info(`[opentiny-playground] Now using Vue version: ${version}`)
     if (refresh.value) location.reload()
   }
-
+  let inited = false
   async function init() {
+    if (inited) return
     await setVueVersion(versions.vue)
 
     state.errors = []
     for (const file of Object.values(state.files)) compileFile(store, file).then((errs) => state.errors.push(...errs))
 
     watchEffect(() => compileFile(store, state.activeFile).then((errs) => (state.errors = errs)))
+
+    watch(
+      () => [state.files[TSCONFIG]?.code, state.typescriptVersion, state.typescriptLocale],
+      useDebounceFn(() => store.reloadLanguageTools?.(), 300)
+    )
+    inited = true
   }
 
   function getFiles() {
@@ -266,14 +278,27 @@ export function useStore(initial: Initial) {
       case 'vue':
         await setVueVersion(version)
         break
+      case 'typescript':
+        await setTSVersion(version)
+        break
     }
+  }
+
+  function setTSVersion(version: string) {
+    versions.typescript = version
+    LocalStorageService.setItem('versions', {
+      openTiny: versions.openTiny,
+      vue: versions.vue,
+      typescript: version
+    })
   }
 
   function setOpenTinyVersion(version: string) {
     versions.openTiny = version
     LocalStorageService.setItem('versions', {
       openTiny: version,
-      vue: versions.vue
+      vue: versions.vue,
+      typescript: versions.typescript
     })
   }
 

@@ -24,7 +24,7 @@ const initialUserOptions: UserOptions = {}
 const store = useStore({
   serializedState: location.hash.slice(1),
   userOptions: initialUserOptions,
-  versions: { vue: '3.2.47', openTiny: '3.9.1' },
+  versions: { vue: '3.2.47', openTiny: '3.9.1', typescript: '5.1.3' },
 })
 LocalStorageService.setItem('versions', store.versions)
 
