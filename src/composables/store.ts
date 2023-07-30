@@ -116,7 +116,7 @@ export function useStore(initial: Initial) {
     const { compilerSfc, runtimeDom } = genVueLink(version)
 
     compiler.value = await import(/* @vite-ignore */ compilerSfc)
-    if (getVs(versions.vue) && !getVs(version)) refresh.value = true
+    if ((getVs(versions.vue) && !getVs(version)) || (!getVs(versions.vue) && getVs(version))) refresh.value = true
     state.vueRuntimeURL = runtimeDom
     versions.vue = version
     LocalStorageService.setItem('versions', {
