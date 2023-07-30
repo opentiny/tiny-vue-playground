@@ -4,6 +4,7 @@ import { computed, reactive, ref, shallowRef, watch, watchEffect } from 'vue'
 import { useDebounceFn, useToggle } from '@vueuse/core'
 import { Modal, Notify } from '@opentiny/vue'
 import mainCode from '../template/main.vue?raw'
+import mainVue2Code from '../template/mainVue2.vue?raw'
 import welcomeCode from '../template/welcome.vue?raw'
 import openTinyCode from '../template/opentiny.js?raw'
 import tsconfigCode from '../template/tsconfig.json?raw'
@@ -179,7 +180,9 @@ export function useStore(initial: Initial) {
     } else {
       files[APP_FILE] = new File(APP_FILE, welcomeCode)
     }
-    files[MAIN_FILE] = new File(MAIN_FILE, mainCode, hideFile.value)
+
+    if (getVs(versions.vue)) files[MAIN_FILE] = new File(MAIN_FILE, mainCode, hideFile.value)
+    else files[MAIN_FILE] = new File(MAIN_FILE, mainVue2Code, hideFile.value)
 
     if (!files[IMPORT_MAP]) files[IMPORT_MAP] = new File(IMPORT_MAP, JSON.stringify({ imports: {} }, undefined, 2))
 

@@ -364,7 +364,6 @@ async function doCompileTemplate(
 
     return code
   } else {
-    console.log('code', 'vue2')
     let code = descriptor.template?.content
 
     if (hasScoped) {

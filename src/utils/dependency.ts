@@ -148,5 +148,9 @@ export function getSupportedOpVersions() {
 
 export function getSupportedTSVersions() {
   const versions = getVersions('typescript')
-  return computed(() => versions.value.filter((version) => !version.includes('dev') && !version.includes('insiders')))
+  return computed(() =>
+    versions.value.filter(
+      (version) => !version.includes('dev') && !version.includes('insiders') && gte(version, '3.9.10')
+    )
+  )
 }
