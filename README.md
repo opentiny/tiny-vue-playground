@@ -13,12 +13,6 @@
 - unocss
 - pnpm
 
-## demo
-- vue3 + tsx + less(with tinyvue): 
-- vue3 + ts + less(with tinyvue):
-- vue3:
-- vue2 + less(with tinyvue):
-- vue2:
 
 ## TODO
 - fix: 调整 header 右侧 icon style
