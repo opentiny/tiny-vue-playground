@@ -3,6 +3,7 @@ import { type Ref, computed, unref } from 'vue'
 import { useFetch, useLocalStorage } from '@vueuse/core'
 import { type Versions } from '@/composables/store'
 import { type ImportMap } from '@/utils/import-map'
+import { getVs } from '@/composables/compile'
 
 export interface Dependency {
   pkg?: string
@@ -77,6 +78,14 @@ export function genImportMap({ vue, openTiny }: Partial<Versions> = {}): ImportM
       pkg: '@opentiny/vue',
       version: openTiny,
       path: '/runtime/tiny-vue-locale.mjs'
+    }
+  }
+  if (getVs(vue!) === false) {
+    // vuw2
+    deps['@vue/composition-api'] = {
+      pkg: '@vue/composition-api',
+      version: '1.2.2',
+      path: '/dist/vue-composition-api.mjs'
     }
   }
 

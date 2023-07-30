@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   '@vue/repl@2.5.5':
-    hash: euy3p7itf6qkihs6775gwrwirm
+    hash: nbfg5it27dcja7wwdufhbbynsm
     path: patches/@vue__repl@2.5.5.patch
 
 importers:
@@ -21,7 +21,7 @@ importers:
         version: 3.9.1
       '@vue/repl':
         specifier: ^2.5.5
-        version: 2.5.5(patch_hash=euy3p7itf6qkihs6775gwrwirm)
+        version: 2.5.5(patch_hash=nbfg5it27dcja7wwdufhbbynsm)
       '@vueuse/core':
         specifier: ^10.2.0
         version: 10.2.1(vue@3.3.4)
@@ -4125,7 +4125,7 @@ packages:
     dependencies:
       '@vue/shared': 3.3.4
 
-  /@vue/repl@2.5.5(patch_hash=euy3p7itf6qkihs6775gwrwirm):
+  /@vue/repl@2.5.5(patch_hash=nbfg5it27dcja7wwdufhbbynsm):
     resolution: {integrity: sha512-wzhUz4kqVHarN1oykypFP8e81VLJMRd0Gtkwa945XbAI1mIGTVVyxgs93H6f73NHsHTD+S144UYLUPVCnlqjeQ==}
     requiresBuild: true
     dev: false
