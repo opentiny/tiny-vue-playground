@@ -1,5 +1,5 @@
 diff --git a/dist/vue-repl.js b/dist/vue-repl.js
-index 5c8e522920ae4e57e24bb3257cdc8afb0c73b896..29b9c2c295dc3d0621db6621c3237ee80242e77e 100644
+index 5c8e522920ae4e57e24bb3257cdc8afb0c73b896..fdc2e797f636d409b5e51e50003a60b93fea5872 100644
 --- a/dist/vue-repl.js
 +++ b/dist/vue-repl.js
 @@ -4,6 +4,10 @@ import { MagicString, babelParse, extractIdentifiers, walkIdentifiers, isStaticP
@@ -41,13 +41,15 @@ index 5c8e522920ae4e57e24bb3257cdc8afb0c73b896..29b9c2c295dc3d0621db6621c3237ee8
              `import { ${isSSR ? `createSSRApp` : `createApp`} as _createApp } from "vue"
          ${previewOptions?.customCode?.importCode || ""}
          const _mount = () => {
-@@ -670,7 +682,24 @@ Tip: edit the "Import Map" tab to specify import paths for dependencies.`;
+@@ -670,7 +682,26 @@ Tip: edit the "Import Map" tab to specify import paths for dependencies.`;
          } else {
            _mount()
          }`
 -          );
 +          ) :
 +          codeToEval.push( `import Vue from "vue"
++          import TinyVue from '@opentiny/vue'
++          Vue.use(use(TinyVue))
 +          const _mount = () => {
 +            const AppComponent = __modules__["${mainFile}"].default
 +            AppComponent.name = 'Repl'
