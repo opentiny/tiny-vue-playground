@@ -331,7 +331,6 @@ async function doCompileTemplate(
   isTS: boolean,
   hasScoped: boolean
 ) {
-  // console.log('version', store.vueVersion)
   if (getVs(store.vueVersion!)) {
     // vue3
     let { code, errors } = store.compiler.compileTemplate({
@@ -365,12 +364,14 @@ async function doCompileTemplate(
 
     return code
   } else {
+    console.log('code', 'vue2')
     let code = descriptor.template?.content
 
     if (hasScoped) {
       const node = document.createElement('div')
       node.setAttribute('id', '#app')
       node.innerHTML = descriptor.template?.content || ''
+
       if (node.childElementCount !== 1) store.state.errors = ['only one element on template toot allowed']
 
       node.querySelectorAll('*').forEach((it) => it.setAttribute(`data-v-${id}`, ''))

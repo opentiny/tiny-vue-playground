@@ -1,5 +1,5 @@
 diff --git a/dist/vue-repl.js b/dist/vue-repl.js
-index 5c8e522920ae4e57e24bb3257cdc8afb0c73b896..32dc6cd9cd4155aeb78ccb12fe2aea0fb9c26670 100644
+index 5c8e522920ae4e57e24bb3257cdc8afb0c73b896..29b9c2c295dc3d0621db6621c3237ee80242e77e 100644
 --- a/dist/vue-repl.js
 +++ b/dist/vue-repl.js
 @@ -4,6 +4,10 @@ import { MagicString, babelParse, extractIdentifiers, walkIdentifiers, isStaticP
@@ -41,7 +41,7 @@ index 5c8e522920ae4e57e24bb3257cdc8afb0c73b896..32dc6cd9cd4155aeb78ccb12fe2aea0f
              `import { ${isSSR ? `createSSRApp` : `createApp`} as _createApp } from "vue"
          ${previewOptions?.customCode?.importCode || ""}
          const _mount = () => {
-@@ -670,7 +682,23 @@ Tip: edit the "Import Map" tab to specify import paths for dependencies.`;
+@@ -670,7 +682,24 @@ Tip: edit the "Import Map" tab to specify import paths for dependencies.`;
          } else {
            _mount()
          }`
@@ -51,7 +51,8 @@ index 5c8e522920ae4e57e24bb3257cdc8afb0c73b896..32dc6cd9cd4155aeb78ccb12fe2aea0f
 +          const _mount = () => {
 +            const AppComponent = __modules__["${mainFile}"].default
 +            AppComponent.name = 'Repl'
-+            AppComponent.el = "#app"
++            AppComponent.el = '#app'
++
 +            const app = window.__app__ = new Vue(AppComponent)
 +            Vue.config.errorHandler = console.error
 +            // app.config.unwrapInjectedRef = true
