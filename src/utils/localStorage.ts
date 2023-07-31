@@ -1,7 +1,7 @@
-const LocalStorageService = {
+const sessionStorageService = {
   setItem(key, value) {
     try {
-      localStorage.setItem(key, JSON.stringify(value))
+      sessionStorage.setItem(key, JSON.stringify(value))
     } catch (error) {
       // 处理错误
       console.error('Error setting item in localStorage:', error)
@@ -9,22 +9,22 @@ const LocalStorageService = {
   },
   getItem(key) {
     try {
-      const value = localStorage.getItem(key)
+      const value = sessionStorage.getItem(key)
       return value ? JSON.parse(value) : null
     } catch (error) {
       // 处理错误
-      console.error('Error getting item from localStorage:', error)
+      console.error('Error getting item from sessionStorage:', error)
       return null
     }
   },
   removeItem(key) {
     try {
-      localStorage.removeItem(key)
+      sessionStorage.removeItem(key)
     } catch (error) {
       // 处理错误
-      console.error('Error removing item from localStorage:', error)
+      console.error('Error removing item from sessionStorage:', error)
     }
   }
 }
 
-export default LocalStorageService
+export default sessionStorageService
