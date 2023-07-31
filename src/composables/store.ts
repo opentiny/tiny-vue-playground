@@ -12,7 +12,7 @@ import { compileFile, getVs } from './compile'
 import { atou, utoa } from '@/utils/encode'
 import { genImportMap, genVueLink } from '@/utils/dependency'
 import { type ImportMap, mergeImportMap } from '@/utils/import-map'
-import LocalStorageService from '@/utils/localStorage'
+import sessionStorageService from '@/utils/localStorage'
 
 type StoreInstance = typeof Store
 type StoreStateInstance = typeof StoreState
@@ -41,7 +41,7 @@ export const TSCONFIG = 'tsconfig.json'
 const refresh = ref(false)
 
 export function useStore(initial: Initial) {
-  const vs = LocalStorageService.getItem('versions')
+  const vs = sessionStorageService.getItem('versions')
   const versions = reactive(vs || initial.versions)
 
   const compiler = shallowRef<typeof import('vue/compiler-sfc')>()
@@ -119,7 +119,7 @@ export function useStore(initial: Initial) {
     if ((getVs(versions.vue) && !getVs(version)) || (!getVs(versions.vue) && getVs(version))) refresh.value = true
     state.vueRuntimeURL = runtimeDom
     versions.vue = version
-    LocalStorageService.setItem('versions', {
+    sessionStorageService.setItem('versions', {
       openTiny: versions.openTiny,
       vue: version,
       typescript: versions.typescript
@@ -289,7 +289,7 @@ export function useStore(initial: Initial) {
 
   function setTSVersion(version: string) {
     versions.typescript = version
-    LocalStorageService.setItem('versions', {
+    sessionStorageService.setItem('versions', {
       openTiny: versions.openTiny,
       vue: versions.vue,
       typescript: version
@@ -298,7 +298,7 @@ export function useStore(initial: Initial) {
 
   function setOpenTinyVersion(version: string) {
     versions.openTiny = version
-    LocalStorageService.setItem('versions', {
+    sessionStorageService.setItem('versions', {
       openTiny: version,
       vue: versions.vue,
       typescript: versions.typescript
