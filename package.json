@@ -1,7 +1,27 @@
 {
   "name": "opentiny-playground",
   "version": "0.1.0",
-  "description": "",
+  "description": "OpenTiny Vue Playground",
+  "homepage": "https://opentiny.github.io/tiny-vue-playground/",
+  "keywords": [
+    "vue",
+    "vue3",
+    "frontend",
+    "component-library",
+    "components",
+    "vue-components",
+    "opentiny",
+    "playground"
+  ],
+  "author": "OpenTiny Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:opentiny/tiny-vue-playground.git"
+  },
+  "bugs": {
+    "url": "https://github.com/opentiny/tiny-vue-playground/issues"
+  },
   "packageManager": "pnpm@8.6.5",
   "main": "index.js",
   "type": "module",
@@ -15,9 +35,6 @@
     "lint:staged": "lint-staged",
     "prepare": "husky install"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@opentiny/vue": "3",
     "@opentiny/vue-icon": "^3.9.1",
