@@ -126,7 +126,7 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
     (descriptor.script && descriptor.script.lang) || (descriptor.scriptSetup && descriptor.scriptSetup.lang)
   // const isTS = scriptLang === 'ts'
   const isTS = testTs(scriptLang)
-  if (scriptLang && !isTS) return ['Only lang="ts" is supported for <script> blocks.']
+  if (scriptLang && !isTS) return ['Only lang="ts" and lang="tsx" and lang="jsx" are supported for <script> blocks.']
 
   const hasScoped = descriptor.styles.some((s) => s.scoped)
   let clientCode = ''
@@ -146,7 +146,7 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
   }
 
   let importsJSX
-  if (scriptLang !== 'tsx') {
+  if (scriptLang !== 'tsx' && scriptLang !== 'jsx') {
     clientCode += clientScript
   } else {
     const { cleanedCode: cleanedCodeJSX, imports } = extractVueImport(clientScript.trim()) // 将 jsx 语法生成的 import 导入去掉
@@ -179,7 +179,7 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
     if (Array.isArray(clientTemplateResult)) return clientTemplateResult
 
     // clientCode += `;${clientTemplateResult}`
-    if (scriptLang !== 'tsx') {
+    if (scriptLang !== 'tsx' && scriptLang !== 'jsx') {
       clientCode += `;${clientTemplateResult}`
     } else {
       const { cleanedCode: cleanedCodeVUE, imports: importsVUE } = extractVueImport(clientTemplateResult.trim())
