@@ -17,3 +17,11 @@
 ## TODO
 - fix: 调整 header 右侧 icon style
 
+## Credits
+
+- [vuejs/repl](https://github.com/vuejs/repl)
+- [element-plus/element-plus-playground](https://github.com/element-plus/element-plus-playground)
+
+## License
+
+[MIT](LICENSE)
