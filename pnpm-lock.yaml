@@ -20,7 +20,7 @@ importers:
         specifier: ^3.9.1
         version: 3.9.1
       '@vue/repl':
-        specifier: ^2.5.5
+        specifier: 2.5.5
         version: 2.5.5(patch_hash=m5cze5p3zzmchhw2o2d663xv2m)
       '@vueuse/core':
         specifier: ^10.2.0
