@@ -89,6 +89,7 @@ export function useStore(initial: Initial) {
     addFile,
     deleteFile,
     getImportMap,
+    setImportMap,
     initialShowOutput: false,
     initialOutputMode: 'preview',
     renameFile,
@@ -263,6 +264,9 @@ export function useStore(initial: Initial) {
 
   function getImportMap() {
     return importMap.value
+  }
+  function setImportMap(value) {
+    return (importMap.value = value)
   }
 
   function getTsConfig() {
