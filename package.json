@@ -1,6 +1,6 @@
 {
-  "name": "opentiny-playground",
-  "version": "0.1.0",
+  "name": "@opentiny/vue-repl",
+  "version": "1.0.0",
   "description": "OpenTiny Vue Playground",
   "homepage": "https://opentiny.github.io/tiny-vue-playground/",
   "keywords": [
@@ -13,6 +13,7 @@
     "opentiny",
     "playground"
   ],
+  "files": ["dist"],
   "author": "OpenTiny Team",
   "license": "MIT",
   "repository": {
@@ -23,7 +24,8 @@
     "url": "https://github.com/opentiny/tiny-vue-playground/issues"
   },
   "packageManager": "pnpm@8.6.5",
-  "main": "index.js",
+  "main": "./dist/tiny-repl.js",
+  "module": "./dist/tiny-repl.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -35,7 +37,8 @@
     "lint:staged": "lint-staged",
     "prepare": "husky install",
     "build:npm": "vite build --config vite.config.npm.ts ",
-    "visual:npm":"npx vite-bundle-visualizer -c vite.config.npm.ts"
+    "visual:npm": "npx vite-bundle-visualizer -c vite.config.npm.ts",
+    "pub": "npm publish --no-git-checks --access=public"
   },
   "dependencies": {
     "@opentiny/vue": "3",
