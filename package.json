@@ -33,7 +33,9 @@
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier --config .prettierrc --write .",
     "lint:staged": "lint-staged",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build:npm": "vite build --config vite.config.npm.ts ",
+    "visual:npm":"npx vite-bundle-visualizer -c vite.config.npm.ts"
   },
   "dependencies": {
     "@opentiny/vue": "3",

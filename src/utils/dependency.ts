@@ -125,8 +125,8 @@ export function getSupportedVueVersions() {
   return computed(() =>
     versions.value.filter((version) => {
       if (version.startsWith('2.')) {
-        // 对于 Vue 2，只保留稳定版本
-        return isStableVersion(version) && gte(version, '2.6.0')
+        // 对于 Vue 2, tiny-vue 只支持2.6.14
+        return version === '2.6.14'
       } else if (version.startsWith('3.')) {
         // 对于 Vue 3，只保留版本号高于等于 3.2.0 的稳定版本
         return isStableVersion(version) && gte(version, '3.2.22')
