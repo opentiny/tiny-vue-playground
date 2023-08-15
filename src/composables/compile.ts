@@ -146,14 +146,19 @@ export async function compileFile(store: IStore, { filename, code, compiled }: I
   }
 
   let importsJSX
-  if (scriptLang !== 'tsx' && scriptLang !== 'jsx') {
+  const isSetup = !!descriptor.scriptSetup
+  if (isSetup) {
     clientCode += clientScript
   } else {
-    const { cleanedCode: cleanedCodeJSX, imports } = extractVueImport(clientScript.trim()) // 将 jsx 语法生成的 import 导入去掉
-    importsJSX = imports
-    const init = 'import { openBlock as _openBlock, createBlock as _createBlock } from "vue"' // this code fix init bug(don't delete)
-    if (importsJSX === '' || importsJSX === init) clientCode += clientScript
-    else clientCode += cleanedCodeJSX
+    if (scriptLang !== 'tsx' && scriptLang !== 'jsx') {
+      clientCode += clientScript
+    } else {
+      const { cleanedCode: cleanedCodeJSX, imports } = extractVueImport(clientScript.trim()) // 将 jsx 语法生成的 import 导入去掉
+      importsJSX = imports
+      const init = 'import { openBlock as _openBlock, createBlock as _createBlock } from "vue"' // this code fix init bug(don't delete)
+      if (importsJSX === '' || importsJSX === init) clientCode += clientScript
+      else clientCode += cleanedCodeJSX
+    }
   }
   // clientCode += clientScript
 
