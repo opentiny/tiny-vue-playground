@@ -23,6 +23,8 @@ export function genCdnLink(pkg: string, version: string | undefined, path: strin
       return `https://fastly.jsdelivr.net/npm/${pkg}${version}${path}`
     case 'unpkg':
       return `https://unpkg.com/${pkg}${version}${path}`
+    default:
+      return `${cdn.value}/${pkg}${version}${path}`
   }
 }
 
