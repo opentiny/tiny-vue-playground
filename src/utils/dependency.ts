@@ -12,20 +12,11 @@ export interface Dependency {
 }
 
 export type Cdn = 'unpkg' | 'jsdelivr' | 'jsdelivr-fastly'
-export const cdn = useLocalStorage('setting-cdn', 'jsdelivr-fastly')
+export const cdn = useLocalStorage('setting-cdn', 'https://unpkg.com')
 
 export function genCdnLink(pkg: string, version: string | undefined, path: string) {
   version = version ? `@${version}` : ''
-  switch (cdn.value) {
-    case 'jsdelivr':
-      return `https://cdn.jsdelivr.net/npm/${pkg}${version}${path}`
-    case 'jsdelivr-fastly':
-      return `https://fastly.jsdelivr.net/npm/${pkg}${version}${path}`
-    case 'unpkg':
-      return `https://unpkg.com/${pkg}${version}${path}`
-    default:
-      return `${cdn.value}/${pkg}${version}${path}`
-  }
+  return `${cdn.value}/${pkg}${version}${path}`
 }
 
 export function genVueLink(version: string) {
