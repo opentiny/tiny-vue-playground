@@ -59,6 +59,7 @@ watchEffect(() => history.replaceState({}, '', `#${store.serialize()}`))
       :store="store"
       :editor="Monaco"
       show-compile-output
+      :layout-reverse="true"
       auto-resize
       :sfc-options="sfcOptions"
       :clear-console="false"

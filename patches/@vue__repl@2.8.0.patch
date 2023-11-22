@@ -1,19 +1,20 @@
 diff --git a/dist/vue-repl.js b/dist/vue-repl.js
-index 5c8e522920ae4e57e24bb3257cdc8afb0c73b896..dfcf8edabe34a8b9b78de1230ab651f09786dadb 100644
+index d931d504bc020db07e7b377487499c639763d3f9..95b246c3d3559b782dc12547bd4d40f2fa5039da 100644
 --- a/dist/vue-repl.js
 +++ b/dist/vue-repl.js
-@@ -4,6 +4,10 @@ import { MagicString, babelParse, extractIdentifiers, walkIdentifiers, isStaticP
- import { c as commonjsGlobal, g as getDefaultExportFromCjs } from './chunks/_commonjsHelpers-24198af3.js';
- import { a as atou, u as utoa, d as debounce } from './chunks/utils-a5e1dbae.js';
+@@ -4,6 +4,11 @@ import { MagicString, babelParse, extractIdentifiers, walkIdentifiers, isStaticP
+ import { c as commonjsGlobal, g as getDefaultExportFromCjs } from './chunks/_commonjsHelpers-2155838d.js';
+ import { a as atou, u as utoa, d as debounce } from './chunks/utils-5585d0be.js';
  
 +function getVs(version){
 +  return Number(version.split('.')[0]) === 3 ? true : false
 +}
++  
 +
  const _hoisted_1$5 = ["onMousedown"];
  const _sfc_main$7 = /* @__PURE__ */ defineComponent({
    __name: "SplitPane",
-@@ -642,16 +646,24 @@ Tip: edit the "Import Map" tab to specify import paths for dependencies.`;
+@@ -645,16 +650,24 @@ Tip: edit the "Import Map" tab to specify import paths for dependencies.`;
          console.log(
            `[@vue/repl] successfully compiled ${modules.length} module${modules.length > 1 ? `s` : ``}.`
          );
@@ -26,22 +27,22 @@ index 5c8e522920ae4e57e24bb3257cdc8afb0c73b896..dfcf8edabe34a8b9b78de1230ab651f0
          document.head.insertAdjacentHTML('beforeend', window.__css__.map(s => \`<style css>\${s}</style>\`).join('\\n'))
        }, 1)`
 -        ];
-+        ] : [`window.__modules__ = {};window.__css__ = [];` +
-+        `if (window.__app__) window.__app__.$destroy();` +
-+        `document.body.innerHTML = '<div id="app"></div>'`,
-+        ...modules,
-+        // `document.getElementById('__sfc-styles').innerHTML = window.__css__`
-+        `setTimeout(()=> {
-+          document.querySelectorAll('style[css]').forEach(el => el.remove())
-+          document.head.insertAdjacentHTML('beforeend', window.__css__.map(s => \`<style css>\${s}</style>\`).join('\\n'))
-+        }, 1)`];
++       ] : [`window.__modules__ = {};window.__css__ = [];` +
++       `if (window.__app__) window.__app__.$destroy();` +
++       `document.body.innerHTML = '<div id="app"></div>'`,
++       ...modules,
++       // `document.getElementById('__sfc-styles').innerHTML = window.__css__`
++       `setTimeout(()=> {
++         document.querySelectorAll('style[css]').forEach(el => el.remove())
++         document.head.insertAdjacentHTML('beforeend', window.__css__.map(s => \`<style css>\${s}</style>\`).join('\\n'))
++       }, 1)`];
          if (mainFile.endsWith(".vue")) {
 -          codeToEval.push(
-+          getVs(store.versions.vue) ? codeToEval.push(
++         getVs(store.versions.vue) ? codeToEval.push(
              `import { ${isSSR ? `createSSRApp` : `createApp`} as _createApp } from "vue"
          ${previewOptions?.customCode?.importCode || ""}
          const _mount = () => {
-@@ -670,7 +682,26 @@ Tip: edit the "Import Map" tab to specify import paths for dependencies.`;
+@@ -673,7 +686,26 @@ Tip: edit the "Import Map" tab to specify import paths for dependencies.`;
          } else {
            _mount()
          }`
