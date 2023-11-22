@@ -5,9 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
-  '@vue/repl@2.5.5':
-    hash: m5cze5p3zzmchhw2o2d663xv2m
-    path: patches/@vue__repl@2.5.5.patch
+  '@vue/repl@2.8.0':
+    hash: hhdbxbnmqtwlyjalrcsinoy7hy
+    path: patches/@vue__repl@2.8.0.patch
 
 importers:
 
@@ -20,8 +20,8 @@ importers:
         specifier: ^3.9.1
         version: 3.9.1
       '@vue/repl':
-        specifier: 2.5.5
-        version: 2.5.5(patch_hash=m5cze5p3zzmchhw2o2d663xv2m)
+        specifier: 2.8.0
+        version: 2.8.0(patch_hash=hhdbxbnmqtwlyjalrcsinoy7hy)
       '@vueuse/core':
         specifier: ^10.2.0
         version: 10.2.1(vue@3.3.4)
@@ -4125,9 +4125,8 @@ packages:
     dependencies:
       '@vue/shared': 3.3.4
 
-  /@vue/repl@2.5.5(patch_hash=m5cze5p3zzmchhw2o2d663xv2m):
-    resolution: {integrity: sha512-wzhUz4kqVHarN1oykypFP8e81VLJMRd0Gtkwa945XbAI1mIGTVVyxgs93H6f73NHsHTD+S144UYLUPVCnlqjeQ==}
-    requiresBuild: true
+  /@vue/repl@2.8.0(patch_hash=hhdbxbnmqtwlyjalrcsinoy7hy):
+    resolution: {integrity: sha512-coXgyoga7+G7BO2ENlfe/0b0vqrT8FasFguaksjrQzpEVC28r6S7+YDhhS6GZnuNhnS8gDqZx7yrXsTOqXsDFg==}
     dev: false
     patched: true
 

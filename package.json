@@ -13,7 +13,9 @@
     "opentiny",
     "playground"
   ],
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "author": "OpenTiny Team",
   "license": "MIT",
   "repository": {
@@ -43,7 +45,7 @@
   "dependencies": {
     "@opentiny/vue": "3",
     "@opentiny/vue-icon": "^3.9.1",
-    "@vue/repl": "2.5.5",
+    "@vue/repl": "2.8.0",
     "@vueuse/core": "^10.2.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
@@ -89,7 +91,7 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "@vue/repl@2.5.5": "patches/@vue__repl@2.5.5.patch"
+      "@vue/repl@2.8.0": "patches/@vue__repl@2.8.0.patch"
     }
   }
 }
