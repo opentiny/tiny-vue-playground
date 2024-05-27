@@ -14,9 +14,12 @@ export interface Dependency {
 export type Cdn = 'unpkg' | 'jsdelivr' | 'jsdelivr-fastly'
 export const cdn = useLocalStorage('setting-cdn', localStorage.getItem('setting-cdn') || 'https://unpkg.com')
 
+const versionDelimiter = cdn.value.includes('npmmirror') ? '/' : '@'
+const fileDelimiter = cdn.value.includes('npmmirror') ? 'files' : ''
+
 export function genCdnLink(pkg: string, version: string | undefined, path: string) {
-  version = version ? `@${version}` : ''
-  return `${cdn.value}/${pkg}${version}${path}`
+  version = version ? `${versionDelimiter}${version}` : ''
+  return `${cdn.value}/${pkg}${version}/${fileDelimiter}${path}`
 }
 
 export function genVueLink(version: string) {
