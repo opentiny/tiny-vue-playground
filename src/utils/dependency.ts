@@ -14,12 +14,13 @@ export interface Dependency {
 export type Cdn = 'unpkg' | 'jsdelivr' | 'jsdelivr-fastly'
 export const cdn = useLocalStorage('setting-cdn', localStorage.getItem('setting-cdn') || 'https://unpkg.com')
 
-const versionDelimiter = cdn.value.includes('npmmirror') ? '/' : '@'
-const fileDelimiter = cdn.value.includes('npmmirror') ? 'files' : ''
+const isNpmMirror = cdn.value.includes('npmmirror')
+const versionDelimiter = isNpmMirror ? '/' : '@'
+const fileDelimiter = isNpmMirror ? 'files' : ''
 
 export function genCdnLink(pkg: string, version: string | undefined, path: string) {
-  version = version ? `${versionDelimiter}${version}` : ''
-  return `${cdn.value}/${pkg}${version}/${fileDelimiter}${path}`
+  const formattedVersion = version ? `${versionDelimiter}${version}` : ''
+  return `${cdn.value}/${pkg}${formattedVersion}/${fileDelimiter}${path}`
 }
 
 export function genVueLink(version: string) {
