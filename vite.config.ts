@@ -38,7 +38,7 @@ export default defineConfig({
     Inspect()
   ],
   define: {
-    'process.env': { ...process.env },
+    'process.env': {},
     'process.platform': '""'
   },
   optimizeDeps: {
