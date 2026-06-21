@@ -49,12 +49,19 @@ const dark = useDark()
 
 // persist state
 watchEffect(() => history.replaceState({}, '', `#${store.serialize()}`))
+
+const replRef = ref<InstanceType<typeof Repl>>()
+
+function reloadPage() {
+  replRef.value?.reload()
+}
 </script>
 
 <template>
   <div v-if="!loading" antialiased>
-    <Header :store="store" />
+    <Header :store="store" @reloadPage="reloadPage" />
     <Repl
+      ref="replRef"
       :theme="dark ? 'dark' : 'light'"
       :store="store"
       :editor="Monaco"

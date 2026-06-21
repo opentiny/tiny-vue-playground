@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { defineEmits, reactive, ref } from 'vue'
 import type { Ref } from 'vue'
 
 import { Notify, Option as TinyOption, Select as TinySelect } from '@opentiny/vue'
@@ -14,6 +14,12 @@ import { type ReplStore, type VersionKey } from '@/composables/store'
 const { store } = defineProps<{
   store: ReplStore
 }>()
+
+const emit = defineEmits(['reloadPage'])
+
+function reloadPage() {
+  emit('reloadPage')
+}
 
 const dark = useDark()
 const toggleDark = useToggle(dark)
@@ -103,6 +109,9 @@ async function copyLink() {
           <a href="https://github.com/opentiny/tiny-vue-playground/tree/main" target="_blank">
             <GitHub />
           </a>
+        </div>
+        <div flex-1 @click="reloadPage">
+          <GitHub />
         </div>
       </div>
     </div>
